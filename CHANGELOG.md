@@ -1,7 +1,11 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
-# temporal-jetbrains-plugin Changelog
+# Temporal.io Changelog
 
-## [Unreleased]
+## [0.0.1]
 ### Added
-- Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
+- Workflow browser with status, type, and timestamps
+- Workflow details panel (overview, input/result, event history)
+- Code navigation to workflow definitions (Go, Java)
+- Multi-environment support
+- Namespace switching

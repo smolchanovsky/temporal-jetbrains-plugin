@@ -1,0 +1,5 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.github.smolchanovsky.temporalplugin">
+        <workflowDefinitionFinder implementation="com.github.smolchanovsky.temporalplugin.ui.navigation.finders.JavaWorkflowPsiFinder"/>
+    </extensions>
+</idea-plugin>

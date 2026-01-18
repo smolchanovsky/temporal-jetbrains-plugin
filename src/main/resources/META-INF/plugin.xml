@@ -1,15 +1,47 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.smolchanovsky.temporaljetbrainsplugin</id>
-    <name>temporal-jetbrains-plugin</name>
-    <vendor>smolchanovsky</vendor>
+    <id>com.github.smolchanovsky.temporalplugin</id>
+    <name>Temporal.io</name>
+    <vendor url="https://github.com/smolchanovsky">smolchanovsky</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.json</depends>
+    <depends optional="true" config-file="java-support.xml">com.intellij.java</depends>
 
-    <resource-bundle>messages.MyBundle</resource-bundle>
+    <resource-bundle>messages.TemporalBundle</resource-bundle>
+
+    <extensionPoints>
+        <extensionPoint
+            name="workflowDefinitionFinder"
+            interface="com.github.smolchanovsky.temporalplugin.ui.navigation.WorkflowDefinitionFinder"
+            dynamic="true"/>
+    </extensionPoints>
+
+    <extensions defaultExtensionNs="com.github.smolchanovsky.temporalplugin">
+        <workflowDefinitionFinder implementation="com.github.smolchanovsky.temporalplugin.ui.navigation.finders.GoWorkflowFinder"/>
+    </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.smolchanovsky.temporaljetbrainsplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
-        <postStartupActivity implementation="com.github.smolchanovsky.temporaljetbrainsplugin.startup.MyProjectActivity" />
+        <toolWindow factoryClass="com.github.smolchanovsky.temporalplugin.ui.toolWindow.TemporalToolWindowFactory"
+                    id="TemporalToolWindow"
+                    anchor="bottom"
+                    icon="AllIcons.Actions.ProjectWideAnalysisOff"/>
+        <projectConfigurable
+                parentId="tools"
+                instance="com.github.smolchanovsky.temporalplugin.ui.settings.TemporalSettingsConfigurable"
+                id="com.github.smolchanovsky.temporalplugin.ui.settings.TemporalSettingsConfigurable"
+                key="settings.displayName"
+                bundle="messages.TemporalBundle"/>
+        <notificationGroup id="TemporalWorkflowNavigation" displayType="BALLOON"
+                           key="notification.group.workflowNavigation" bundle="messages.TemporalBundle"/>
+        <notificationGroup id="TemporalErrors" displayType="BALLOON"
+                           key="notification.group.errors" bundle="messages.TemporalBundle"/>
     </extensions>
+
+    <actions>
+        <action id="Temporal.OpenToolWindow"
+                class="com.github.smolchanovsky.temporalplugin.ui.toolWindow.OpenToolWindowAction">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>

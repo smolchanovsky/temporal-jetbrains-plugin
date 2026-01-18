@@ -1,52 +1,82 @@
-# temporal-jetbrains-plugin
+# Temporal.io Plugin for JetBrains IDEs
 
 ![Build](https://github.com/smolchanovsky/temporal-jetbrains-plugin/workflows/Build/badge.svg)
 [![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 
-## Template ToDo list
-- [x] Create a new [IntelliJ Platform Plugin Template][template] project.
-- [ ] Get familiar with the [template documentation][template].
-- [ ] Adjust the [pluginGroup](./gradle.properties) and [pluginName](./gradle.properties), as well as the [id](./src/main/resources/META-INF/plugin.xml) and [sources package](./src/main/kotlin).
-- [ ] Adjust the plugin description in `README` (see [Tips][docs:plugin-description])
-- [ ] Review the [Legal Agreements](https://plugins.jetbrains.com/docs/marketplace/legal-agreements.html?from=IJPluginTemplate).
-- [ ] [Publish a plugin manually](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginTemplate) for the first time.
-- [ ] Set the `MARKETPLACE_ID` in the above README badges. You can obtain it once the plugin is published to JetBrains Marketplace.
-- [ ] Set the [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html?from=IJPluginTemplate) related [secrets](https://github.com/JetBrains/intellij-platform-plugin-template#environment-variables).
-- [ ] Set the [Deployment Token](https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html?from=IJPluginTemplate).
-- [ ] Click the <kbd>Watch</kbd> button on the top of the [IntelliJ Platform Plugin Template][template] to be notified about releases containing new features and fixes.
-- [ ] Configure the [CODECOV_TOKEN](https://docs.codecov.com/docs/quick-start) secret for automated test coverage reports on PRs
-
 <!-- Plugin description -->
-This Fancy IntelliJ Platform Plugin is going to be your implementation of the brilliant ideas that you have.
+A JetBrains IDE plugin for browsing and navigating [Temporal](https://temporal.io/) workflows.
 
-This specific section is a source for the [plugin.xml](/src/main/resources/META-INF/plugin.xml) file which will be extracted by the [Gradle](/build.gradle.kts) during the build process.
+**Features:**
+- **Workflow Browser** — Browse workflows with status, type, and timestamps directly from your IDE
+- **Workflow Details** — View workflow overview, input/output, and complete event history with timestamps and detailed attributes
+- **Code Navigation** — Navigate from workflows to their definitions in code (Go, Java)
+- **Multi-Environment & Namespace Support** — Work with Temporal Cloud and self-hosted environments, switch between namespaces
 
-To keep everything working, do not remove `<!-- ... -->` sections. 
+**Supported IDEs:**
+[IntelliJ IDEA](https://www.jetbrains.com/idea/) |
+[GoLand](https://www.jetbrains.com/go/) |
+[PyCharm](https://www.jetbrains.com/pycharm/) |
+[WebStorm](https://www.jetbrains.com/webstorm/) |
+[PhpStorm](https://www.jetbrains.com/phpstorm/) |
+[Rider](https://www.jetbrains.com/rider/) |
+[RubyMine](https://www.jetbrains.com/ruby/)
 <!-- Plugin description end -->
+
+## Screenshots
+
+![Workflow List](images/workflow-list.png)
+
+## Requirements
+
+- **IDE**: JetBrains IDE 2025.2+
+- **Temporal CLI**: [Install Temporal CLI](https://docs.temporal.io/cli#install)
 
 ## Installation
 
-- Using the IDE built-in plugin system:
+### From JetBrains Marketplace (Recommended)
 
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "temporal-jetbrains-plugin"</kbd> >
-  <kbd>Install</kbd>
+1. Open your IDE
+2. Go to <kbd>Settings</kbd> → <kbd>Plugins</kbd> → <kbd>Marketplace</kbd>
+3. Search for [**"Temporal.io"**](https://plugins.jetbrains.com/search?search=Temporal.io)
+4. Click <kbd>Install</kbd> and restart the IDE
 
-- Using JetBrains Marketplace:
+### Manual Installation
 
-  Go to [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID) and install it by clicking the <kbd>Install to ...</kbd> button in case your IDE is running.
+1. Download the latest release from [GitHub Releases](https://github.com/smolchanovsky/temporal-jetbrains-plugin/releases/latest)
+2. Go to <kbd>Settings</kbd> → <kbd>Plugins</kbd> → <kbd>⚙️</kbd> → <kbd>Install plugin from disk...</kbd>
+3. Select the downloaded `.zip` file
+4. Restart the IDE
 
-  You can also download the [latest release](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID/versions) from JetBrains Marketplace and install it manually using
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
+<!-- Plugin usage -->
+## Getting Started
 
-- Manually:
+### 1. Configure Temporal CLI
 
-  Download the [latest release](https://github.com/smolchanovsky/temporal-jetbrains-plugin/releases/latest) and install it manually using
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
+The plugin uses Temporal CLI for server communication. Ensure it's installed: `temporal --version`
 
+If the CLI is not in your PATH, configure it in <kbd>Settings</kbd> → <kbd>Tools</kbd> → <kbd>Temporal</kbd>
 
----
-Plugin based on the [IntelliJ Platform Plugin Template][template].
+### 2. Connect to Temporal Server
 
-[template]: https://github.com/JetBrains/intellij-platform-plugin-template
-[docs:plugin-description]: https://plugins.jetbrains.com/docs/intellij/plugin-user-experience.html#plugin-description-and-presentation
+1. Open <kbd>View</kbd> → <kbd>Tool Windows</kbd> → <kbd>Temporal</kbd>
+2. Click **Connect**, select environment and namespace
+
+### 3. Browse and Navigate
+
+- Double-click a workflow to view details (overview, input/result, event history)
+- Use **Go to Definition** to navigate to workflow code (Go, Java supported)
+<!-- Plugin usage end -->
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
+
+## License
+
+This project is licensed under the Apache License 2.0 — see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [Temporal](https://temporal.io/) — Workflow orchestration platform
+- [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template) — Project foundation

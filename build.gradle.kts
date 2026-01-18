@@ -5,6 +5,7 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 plugins {
     id("java") // Java support
     alias(libs.plugins.kotlin) // Kotlin support
+    alias(libs.plugins.kotlinSerialization) // Kotlin Serialization
     alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
@@ -31,6 +32,11 @@ repositories {
 
 // Dependencies are managed with Gradle version catalog - read more: https://docs.gradle.org/current/userguide/version_catalogs.html
 dependencies {
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kediatr.core) {
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
+    }
+
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
 
@@ -57,16 +63,23 @@ intellijPlatform {
         name = providers.gradleProperty("pluginName")
         version = providers.gradleProperty("pluginVersion")
 
-        // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
+        // Extract the <!-- Plugin description --> and <!-- Plugin usage --> sections from README.md and provide for the plugin's manifest
         description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
-            val start = "<!-- Plugin description -->"
-            val end = "<!-- Plugin description end -->"
+            val descStart = "<!-- Plugin description -->"
+            val descEnd = "<!-- Plugin description end -->"
+            val usageStart = "<!-- Plugin usage -->"
+            val usageEnd = "<!-- Plugin usage end -->"
 
             with(it.lines()) {
-                if (!containsAll(listOf(start, end))) {
-                    throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                if (!containsAll(listOf(descStart, descEnd))) {
+                    throw GradleException("Plugin description section not found in README.md:\n$descStart ... $descEnd")
                 }
-                subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
+                val descSection = subList(indexOf(descStart) + 1, indexOf(descEnd)).joinToString("\n")
+                val usageSection = if (containsAll(listOf(usageStart, usageEnd))) {
+                    subList(indexOf(usageStart) + 1, indexOf(usageEnd)).joinToString("\n")
+                } else ""
+
+                (descSection + "\n\n" + usageSection).let(::markdownToHTML)
             }
         }
 
