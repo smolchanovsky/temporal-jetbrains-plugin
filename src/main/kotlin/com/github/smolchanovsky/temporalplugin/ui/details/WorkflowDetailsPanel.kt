@@ -9,6 +9,7 @@ import com.github.smolchanovsky.temporalplugin.ui.details.actions.BackAction
 import com.github.smolchanovsky.temporalplugin.ui.details.actions.OpenInBrowserAction
 import com.github.smolchanovsky.temporalplugin.ui.details.actions.RefreshDetailsAction
 import com.github.smolchanovsky.temporalplugin.ui.workflows.actions.GoToDefinitionAction
+import com.github.smolchanovsky.temporalplugin.ui.workflows.actions.RunSimilarWorkflowAction
 import com.github.smolchanovsky.temporalplugin.ui.common.onFailureNotify
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.service
@@ -32,6 +33,7 @@ class WorkflowDetailsPanel(
     private val toolbar = WorkflowDetailsToolbar(
         backAction = BackAction(project),
         refreshAction = RefreshDetailsAction(project, scope),
+        runSimilarAction = RunSimilarWorkflowAction(project, scope),
         goToDefinitionAction = GoToDefinitionAction(project),
         openInBrowserAction = OpenInBrowserAction(project)
     )

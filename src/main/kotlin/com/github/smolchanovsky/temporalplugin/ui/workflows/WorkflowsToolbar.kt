@@ -50,13 +50,12 @@ class WorkflowsToolbar(
         Disposer.register(this, nsSelector)
 
         val actionGroup = DefaultActionGroup().apply {
-            add(ConnectionStatusAction(project))
-            addSeparator()
             add(ConnectAction(project))
             add(DisconnectAction(project))
+            addSeparator()
             add(RefreshAction(project))
-            add(GoToDefinitionAction(project))
             add(RunSimilarWorkflowAction(project, scope))
+            add(GoToDefinitionAction(project))
             addSeparator()
             add(envSelector)
             add(nsSelector)

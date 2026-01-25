@@ -21,7 +21,7 @@ class ConnectAction(
 ) : DumbAwareAction(
     TextBundle.message("action.connect"),
     TextBundle.message("action.connect.description"),
-    AllIcons.Actions.Execute
+    AllIcons.Actions.ProfileBlue
 ) {
 
     private val state: TemporalStateReader = project.service<TemporalState>()
@@ -37,6 +37,8 @@ class ConnectAction(
     }
 
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabled = state.connectionState is ConnectionState.Disconnected
+        val disconnected = state.connectionState is ConnectionState.Disconnected
+        e.presentation.isVisible = disconnected
+        e.presentation.isEnabled = disconnected
     }
 }

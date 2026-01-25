@@ -1,8 +1,8 @@
 package com.github.smolchanovsky.temporalplugin.ui.workflows
 
 import com.github.smolchanovsky.temporalplugin.domain.Workflow
-import com.github.smolchanovsky.temporalplugin.ui.settings.TemporalSettings
 import com.github.smolchanovsky.temporalplugin.services.AutoRefreshService
+import com.github.smolchanovsky.temporalplugin.ui.settings.TemporalSettings
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -27,6 +27,7 @@ class WorkflowsPanel(
 
     private val toolbar = WorkflowsToolbar(project, effectiveScope)
     private val table = WorkflowList(project, onWorkflowDoubleClick)
+    private val statusIcon = ConnectionStatusIcon(project)
     private val statusLabel = ConnectionInfoLabel(project)
 
     init {
@@ -36,11 +37,17 @@ class WorkflowsPanel(
 
         Disposer.register(this, toolbar)
         Disposer.register(this, table)
+        Disposer.register(this, statusIcon)
         Disposer.register(this, statusLabel)
+
+        val bottomPanel = JPanel(BorderLayout()).apply {
+            add(statusIcon, BorderLayout.WEST)
+            add(statusLabel, BorderLayout.CENTER)
+        }
 
         add(toolbar, BorderLayout.NORTH)
         add(table, BorderLayout.CENTER)
-        add(statusLabel, BorderLayout.SOUTH)
+        add(bottomPanel, BorderLayout.SOUTH)
 
         toolbar.load()
     }

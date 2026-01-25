@@ -12,6 +12,7 @@ import javax.swing.JPanel
 class WorkflowDetailsToolbar(
     backAction: AnAction,
     refreshAction: AnAction,
+    runSimilarAction: AnAction,
     goToDefinitionAction: AnAction,
     openInBrowserAction: AnAction
 ) : JPanel(BorderLayout()), Disposable {
@@ -23,6 +24,7 @@ class WorkflowDetailsToolbar(
             add(backAction)
             addSeparator()
             add(refreshAction)
+            add(runSimilarAction)
             add(goToDefinitionAction)
             add(openInBrowserAction)
         }

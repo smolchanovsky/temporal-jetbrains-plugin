@@ -19,7 +19,7 @@ class DisconnectAction(
 ) : DumbAwareAction(
     TextBundle.message("action.disconnect"),
     TextBundle.message("action.disconnect.description"),
-    AllIcons.Actions.Suspend
+    AllIcons.Actions.ProfileRed
 ) {
 
     private val state = project.service<TemporalState>()
@@ -35,6 +35,8 @@ class DisconnectAction(
 
     override fun update(e: AnActionEvent) {
         val connectionState = state.connectionState
-        e.presentation.isEnabled = connectionState is ConnectionState.Connected || connectionState is ConnectionState.Connecting
+        val notDisconnected = connectionState !is ConnectionState.Disconnected
+        e.presentation.isVisible = notDisconnected
+        e.presentation.isEnabled = notDisconnected
     }
 }

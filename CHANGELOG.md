@@ -8,6 +8,7 @@
 
 ### Changed
 - Improved Go workflow navigation reliability
+- Improved toolbar actions usability
 
 ## [0.0.1]
 ### Added

@@ -7,13 +7,16 @@ import com.github.smolchanovsky.temporalplugin.domain.Workflow
 import com.github.smolchanovsky.temporalplugin.state.ConnectionState
 import com.github.smolchanovsky.temporalplugin.state.TemporalState
 import com.github.smolchanovsky.temporalplugin.state.TemporalStateReader
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
+import com.intellij.util.ui.JBUI
 import java.awt.BorderLayout
 import java.awt.Color
+import javax.swing.Icon
 import javax.swing.JPanel
 import javax.swing.SwingUtilities
 
@@ -47,9 +50,11 @@ class ConnectionInfoLabel(project: Project) : JPanel(BorderLayout()), Disposable
     }
 
     init {
+        border = JBUI.Borders.empty(2, 0, 2, 8)
         add(label, BorderLayout.WEST)
         state.addConnectionStateListener(onStateChanged)
         state.addWorkflowsListener(onWorkflowsUpdated)
+        onStateChanged(state.connectionState)
     }
 
     fun showDisconnected() = display(
