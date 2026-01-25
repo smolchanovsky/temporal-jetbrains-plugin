@@ -3,6 +3,8 @@
 # Temporal.io Changelog
 
 ## [Unreleased]
+
+## [0.0.2]
 ### Added
 - Run Similar Workflow: start a new workflow with pre-filled parameters from an existing one
 
