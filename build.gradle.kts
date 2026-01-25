@@ -167,5 +167,11 @@ intellijPlatformTesting {
                 robotServerPlugin()
             }
         }
+
+        // Run plugin in GoLand
+        register("runIdeForGoLand") {
+            type = org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.GoLand
+            version = providers.gradleProperty("platformVersion")
+        }
     }
 }
