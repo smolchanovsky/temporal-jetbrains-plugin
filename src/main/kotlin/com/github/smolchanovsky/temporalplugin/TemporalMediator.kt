@@ -6,13 +6,16 @@ import com.github.smolchanovsky.temporalplugin.cli.GetNamespacesQueryHandler
 import com.github.smolchanovsky.temporalplugin.cli.GetWorkflowDetailsQueryHandler
 import com.github.smolchanovsky.temporalplugin.cli.GetWorkflowHistoryQueryHandler
 import com.github.smolchanovsky.temporalplugin.cli.GetWorkflowsQueryHandler
+import com.github.smolchanovsky.temporalplugin.cli.StartWorkflowCommandHandler
 import com.github.smolchanovsky.temporalplugin.cli.utils.CliExecutor
 import com.github.smolchanovsky.temporalplugin.ui.settings.TemporalSettings
 import com.github.smolchanovsky.temporalplugin.state.TemporalState
 import com.github.smolchanovsky.temporalplugin.usecase.ConnectUseCaseHandler
 import com.github.smolchanovsky.temporalplugin.usecase.DisconnectUseCaseHandler
+import com.github.smolchanovsky.temporalplugin.usecase.GenerateWorkflowDataHandler
 import com.github.smolchanovsky.temporalplugin.usecase.LoadWorkflowDetailsUseCaseHandler
 import com.github.smolchanovsky.temporalplugin.usecase.RefreshUseCaseHandler
+import com.github.smolchanovsky.temporalplugin.usecase.RunSimilarWorkflowHandler
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -35,10 +38,13 @@ class TemporalMediator(project: Project) {
                 GetWorkflowsQueryHandler(cli),
                 GetWorkflowDetailsQueryHandler(cli),
                 GetWorkflowHistoryQueryHandler(cli),
+                StartWorkflowCommandHandler(cli),
                 ConnectUseCaseHandler(state) { instance },
                 DisconnectUseCaseHandler(state),
                 RefreshUseCaseHandler(state) { instance },
-                LoadWorkflowDetailsUseCaseHandler(state) { instance }
+                LoadWorkflowDetailsUseCaseHandler(state) { instance },
+                GenerateWorkflowDataHandler(state) { instance },
+                RunSimilarWorkflowHandler(state) { instance }
             )
         )
         instance

@@ -3,6 +3,9 @@
 # Temporal.io Changelog
 
 ## [Unreleased]
+### Added
+- Run Similar Workflow: start a new workflow with pre-filled parameters from an existing one
+
 ### Changed
 - Improved Go workflow navigation reliability
 

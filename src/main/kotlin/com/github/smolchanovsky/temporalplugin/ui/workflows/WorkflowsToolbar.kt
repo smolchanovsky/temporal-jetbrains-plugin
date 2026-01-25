@@ -56,6 +56,7 @@ class WorkflowsToolbar(
             add(DisconnectAction(project))
             add(RefreshAction(project))
             add(GoToDefinitionAction(project))
+            add(RunSimilarWorkflowAction(project, scope))
             addSeparator()
             add(envSelector)
             add(nsSelector)

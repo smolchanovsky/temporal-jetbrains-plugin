@@ -105,6 +105,7 @@ class GetWorkflowHistoryQueryHandler(
             }
             is JsonObject -> {
                 value["name"]?.jsonPrimitive?.contentOrNull
+                    ?: value["payloads"]?.jsonArray?.let { decodePayload(it) }
                     ?: value.toString().takeIf { value.isNotEmpty() }
             }
             is JsonArray -> {
