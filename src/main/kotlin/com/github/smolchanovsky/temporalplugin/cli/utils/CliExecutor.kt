@@ -47,10 +47,15 @@ class CliExecutor(private val config: TemporalCliConfig) {
             else -> "Command failed with exit code $exitCode"
         }
 
-        return if (message.contains("executable file not found") || message.contains("command not found")) {
-            CliNotConfiguredException()
-        } else {
-            Exception(message)
+        return when {
+            message.contains("executable file not found") || message.contains("command not found") ->
+                CliNotConfiguredException()
+            message.contains("connection refused", ignoreCase = true) ||
+                message.contains("connection error", ignoreCase = true) ||
+                message.contains("failed reaching server", ignoreCase = true) ->
+                ServerConnectionException()
+            else ->
+                Exception(message)
         }
     }
 
