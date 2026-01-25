@@ -1,8 +1,8 @@
 # Temporal.io Plugin for JetBrains IDEs
 
 ![Build](https://github.com/smolchanovsky/temporal-jetbrains-plugin/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/29819-temporal-io)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/29819-temporal-io)
+[![Version](https://img.shields.io/jetbrains/plugin/v/29819-temporal-io.svg)](https://plugins.jetbrains.com/plugin/29819-temporal-io)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/29819-temporal-io.svg)](https://plugins.jetbrains.com/plugin/29819-temporal-io)
 
 <!-- Plugin description -->
 A JetBrains IDE plugin for browsing and navigating [Temporal](https://temporal.io/) workflows.
