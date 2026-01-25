@@ -2,6 +2,10 @@
 
 # Temporal.io Changelog
 
+## [Unreleased]
+### Changed
+- Improved Go workflow navigation reliability
+
 ## [0.0.1]
 ### Added
 - Workflow browser with status, type, and timestamps
