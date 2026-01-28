@@ -28,6 +28,8 @@ class WorkflowNavigationService(private val project: Project) {
     private val finders: List<WorkflowDefinitionFinder>
         get() = EP_NAME.extensionList
 
+    fun hasFinders(): Boolean = finders.isNotEmpty()
+
     fun navigateToWorkflowDefinition(workflowType: String) {
         ProgressManager.getInstance().run(object : Task.Backgroundable(
             project,

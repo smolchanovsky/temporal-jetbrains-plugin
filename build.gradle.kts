@@ -251,6 +251,18 @@ intellijPlatformTesting {
         register("runIdeForGoLand") {
             type = org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.GoLand
             version = providers.gradleProperty("platformVersion")
+
+            plugins {}
+        }
+
+        // Run plugin in Rider
+        register("runIdeForRider") {
+            type = org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.Rider
+            version = providers.gradleProperty("platformVersion")
+
+            plugins {
+                disablePlugin("org.jetbrains.plugins.go")
+            }
         }
     }
 }
