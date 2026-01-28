@@ -55,6 +55,7 @@ class WorkflowsToolbar(
             addSeparator()
             add(RefreshAction(project))
             add(RunSimilarWorkflowAction(project, scope))
+            add(CancelWorkflowActionGroup(project, scope))
             add(GoToDefinitionAction(project))
             addSeparator()
             add(envSelector)

@@ -8,6 +8,7 @@ import com.github.smolchanovsky.temporalplugin.usecase.LoadWorkflowDetailsUseCas
 import com.github.smolchanovsky.temporalplugin.ui.details.actions.BackAction
 import com.github.smolchanovsky.temporalplugin.ui.details.actions.OpenInBrowserAction
 import com.github.smolchanovsky.temporalplugin.ui.details.actions.RefreshDetailsAction
+import com.github.smolchanovsky.temporalplugin.ui.workflows.actions.CancelWorkflowActionGroup
 import com.github.smolchanovsky.temporalplugin.ui.workflows.actions.GoToDefinitionAction
 import com.github.smolchanovsky.temporalplugin.ui.workflows.actions.RunSimilarWorkflowAction
 import com.github.smolchanovsky.temporalplugin.ui.common.onFailureNotify
@@ -34,6 +35,7 @@ class WorkflowDetailsPanel(
         backAction = BackAction(project),
         refreshAction = RefreshDetailsAction(project, scope),
         runSimilarAction = RunSimilarWorkflowAction(project, scope),
+        cancelActionGroup = CancelWorkflowActionGroup(project, scope),
         goToDefinitionAction = GoToDefinitionAction(project),
         openInBrowserAction = OpenInBrowserAction(project)
     )

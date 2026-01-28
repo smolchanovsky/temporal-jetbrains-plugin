@@ -13,6 +13,7 @@ class WorkflowDetailsToolbar(
     backAction: AnAction,
     refreshAction: AnAction,
     runSimilarAction: AnAction,
+    cancelActionGroup: AnAction,
     goToDefinitionAction: AnAction,
     openInBrowserAction: AnAction
 ) : JPanel(BorderLayout()), Disposable {
@@ -25,6 +26,7 @@ class WorkflowDetailsToolbar(
             addSeparator()
             add(refreshAction)
             add(runSimilarAction)
+            add(cancelActionGroup)
             add(goToDefinitionAction)
             add(openInBrowserAction)
         }
