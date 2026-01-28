@@ -31,12 +31,16 @@ class WorkflowsToolbar(
 
     private val envSelector: EnvironmentSelector
     private val nsSelector: NamespaceSelector
-    private val toolbar: ActionToolbar
+    private val leftToolbar: ActionToolbar
+    private val rightToolbar: ActionToolbar
 
     private val onEnvironmentChanged: () -> Unit = { refreshIfConnected() }
     private val onNamespaceChanged: () -> Unit = { refreshIfConnected() }
     private val onConnectionStateChanged: (ConnectionState) -> Unit = {
-        SwingUtilities.invokeLater { toolbar.updateActionsAsync() }
+        SwingUtilities.invokeLater {
+            leftToolbar.updateActionsAsync()
+            rightToolbar.updateActionsAsync()
+        }
     }
 
     init {
@@ -49,29 +53,39 @@ class WorkflowsToolbar(
 
         Disposer.register(this, nsSelector)
 
-        val actionGroup = DefaultActionGroup().apply {
+        val leftActionGroup = DefaultActionGroup().apply {
             add(ConnectAction(project))
             add(DisconnectAction(project))
-            addSeparator()
             add(RefreshAction(project))
+            addSeparator()
             add(RunSimilarWorkflowAction(project, scope))
             add(CancelWorkflowActionGroup(project, scope))
             add(GoToDefinitionAction(project))
             addSeparator()
-            add(envSelector)
-            add(nsSelector)
-            addSeparator()
             add(SettingsAction(project))
         }
 
-        toolbar = ActionManager.getInstance().createActionToolbar(
+        val rightActionGroup = DefaultActionGroup().apply {
+            add(envSelector)
+            add(nsSelector)
+        }
+
+        leftToolbar = ActionManager.getInstance().createActionToolbar(
             ActionPlaces.TOOLWINDOW_CONTENT,
-            actionGroup,
+            leftActionGroup,
             true
         )
-        toolbar.targetComponent = this
+        leftToolbar.targetComponent = this
 
-        add(toolbar.component, BorderLayout.CENTER)
+        rightToolbar = ActionManager.getInstance().createActionToolbar(
+            ActionPlaces.TOOLWINDOW_CONTENT,
+            rightActionGroup,
+            true
+        )
+        rightToolbar.targetComponent = this
+
+        add(leftToolbar.component, BorderLayout.WEST)
+        add(rightToolbar.component, BorderLayout.EAST)
     }
 
     private fun refreshIfConnected() {
