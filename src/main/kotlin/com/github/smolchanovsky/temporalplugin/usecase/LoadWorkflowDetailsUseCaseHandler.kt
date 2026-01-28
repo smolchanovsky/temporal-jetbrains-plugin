@@ -25,13 +25,14 @@ class LoadWorkflowDetailsUseCaseHandler(
 
     override suspend fun handle(request: LoadWorkflowDetailsUseCase): Result<Pair<WorkflowDetails, WorkflowHistory>> {
         val connectionState = state.connectionState
-        if (connectionState !is ConnectionState.Connected) {
-            return Result.failure(Exception("Not connected"))
+
+        val (environment, namespace) = when (connectionState) {
+            is ConnectionState.Connected -> connectionState.environment to connectionState.namespace
+            is ConnectionState.Refreshing -> connectionState.environment to connectionState.namespace
+            else -> return Result.failure(Exception("Not connected"))
         }
 
         val workflow = request.workflow
-        val environment = connectionState.environment
-        val namespace = connectionState.namespace
 
         return try {
             coroutineScope {

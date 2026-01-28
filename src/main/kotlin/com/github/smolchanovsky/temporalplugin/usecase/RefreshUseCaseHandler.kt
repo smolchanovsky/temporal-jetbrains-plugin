@@ -34,7 +34,9 @@ class RefreshUseCaseHandler(
         }
 
         delay(500)
-        state.updateConnectionState(ConnectionState.Connected(env, ns))
+        if (state.connectionState is ConnectionState.Refreshing) {
+            state.updateConnectionState(ConnectionState.Connected(env, ns))
+        }
 
         return result
     }
