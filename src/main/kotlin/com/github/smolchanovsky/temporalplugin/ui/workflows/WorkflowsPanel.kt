@@ -45,11 +45,11 @@ class WorkflowsPanel(
 
         val topPanel = JPanel().apply {
             layout = BoxLayout(this, BoxLayout.Y_AXIS)
+            add(toolbar)
             if (AnalyticsConsentBanner.shouldShow()) {
                 consentBanner = AnalyticsConsentBanner { dismissConsentBanner() }
                 add(consentBanner)
             }
-            add(toolbar)
         }
 
         val bottomPanel = JPanel(BorderLayout()).apply {
