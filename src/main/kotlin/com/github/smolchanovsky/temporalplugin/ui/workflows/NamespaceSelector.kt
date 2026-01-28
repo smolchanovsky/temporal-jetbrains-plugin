@@ -67,7 +67,8 @@ class NamespaceSelector(
 
     override fun update(e: AnActionEvent) {
         val connectionState = state.connectionState
-        e.presentation.isEnabled = connectionState is ConnectionState.Connected
+        e.presentation.isEnabled = connectionState is ConnectionState.Connected ||
+            connectionState is ConnectionState.Refreshing
         e.presentation.text = "NS: ${if (namespaces.isNotEmpty()) state.selectedNamespace.name else "-"}"
     }
 

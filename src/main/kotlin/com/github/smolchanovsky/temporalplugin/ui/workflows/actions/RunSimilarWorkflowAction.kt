@@ -49,7 +49,9 @@ class RunSimilarWorkflowAction(
     }
 
     override fun update(e: AnActionEvent) {
-        val connected = state.connectionState is ConnectionState.Connected
+        val connectionState = state.connectionState
+        val connected = connectionState is ConnectionState.Connected ||
+            connectionState is ConnectionState.Refreshing
         val hasSelection = state.selectedWorkflow != null
         e.presentation.isEnabled = connected && hasSelection
     }

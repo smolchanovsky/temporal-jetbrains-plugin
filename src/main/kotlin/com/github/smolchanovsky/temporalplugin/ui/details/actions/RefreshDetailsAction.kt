@@ -29,7 +29,7 @@ class RefreshDetailsAction(
 
     override fun doActionPerformed(e: AnActionEvent) {
         val viewState = state.viewState
-        if (viewState is ViewState.WorkflowDetailsView && !viewState.isLoading) {
+        if (viewState is ViewState.WorkflowDetailsView) {
             scope.launch {
                 mediator.send(LoadWorkflowDetailsUseCase(viewState.workflow))
                     .onFailureNotify(project)
@@ -39,6 +39,6 @@ class RefreshDetailsAction(
 
     override fun update(e: AnActionEvent) {
         val viewState = state.viewState
-        e.presentation.isEnabled = viewState is ViewState.WorkflowDetailsView && !viewState.isLoading
+        e.presentation.isEnabled = viewState is ViewState.WorkflowDetailsView
     }
 }

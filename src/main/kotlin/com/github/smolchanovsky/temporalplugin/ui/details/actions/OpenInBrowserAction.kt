@@ -28,9 +28,14 @@ class OpenInBrowserAction(
         val viewState = state.viewState
         val connectionState = state.connectionState
 
-        if (viewState is ViewState.WorkflowDetailsView && connectionState is ConnectionState.Connected) {
+        val namespace = when (connectionState) {
+            is ConnectionState.Connected -> connectionState.namespace.name
+            is ConnectionState.Refreshing -> connectionState.namespace.name
+            else -> return
+        }
+
+        if (viewState is ViewState.WorkflowDetailsView) {
             val webUiAddress = settings.webUiAddress.removePrefix("http://").removePrefix("https://")
-            val namespace = connectionState.namespace.name
             val workflowId = viewState.workflow.id
             val runId = viewState.workflow.runId
 
@@ -41,7 +46,9 @@ class OpenInBrowserAction(
 
     override fun update(e: AnActionEvent) {
         val viewState = state.viewState
-        e.presentation.isEnabled = viewState is ViewState.WorkflowDetailsView &&
-                state.connectionState is ConnectionState.Connected
+        val connectionState = state.connectionState
+        val connected = connectionState is ConnectionState.Connected ||
+            connectionState is ConnectionState.Refreshing
+        e.presentation.isEnabled = viewState is ViewState.WorkflowDetailsView && connected
     }
 }

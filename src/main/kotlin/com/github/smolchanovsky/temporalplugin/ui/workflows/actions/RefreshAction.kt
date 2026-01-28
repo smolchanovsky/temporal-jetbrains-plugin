@@ -35,6 +35,8 @@ class RefreshAction(
     }
 
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabled = state.connectionState is ConnectionState.Connected
+        val connectionState = state.connectionState
+        e.presentation.isEnabled = connectionState is ConnectionState.Connected ||
+            connectionState is ConnectionState.Refreshing
     }
 }
