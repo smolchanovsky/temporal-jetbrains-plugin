@@ -2,6 +2,7 @@ package com.github.smolchanovsky.temporalplugin.ui.workflows
 
 import com.github.smolchanovsky.temporalplugin.domain.Workflow
 import com.github.smolchanovsky.temporalplugin.services.AutoRefreshService
+import com.github.smolchanovsky.temporalplugin.ui.analytics.AnalyticsConsentBanner
 import com.github.smolchanovsky.temporalplugin.ui.settings.TemporalSettings
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.service
@@ -12,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import java.awt.BorderLayout
+import javax.swing.BoxLayout
 import javax.swing.JPanel
 
 class WorkflowsPanel(
@@ -29,6 +31,7 @@ class WorkflowsPanel(
     private val table = WorkflowList(project, onWorkflowDoubleClick)
     private val statusIcon = ConnectionStatusIcon(project)
     private val statusLabel = ConnectionInfoLabel(project)
+    private var consentBanner: AnalyticsConsentBanner? = null
 
     init {
         if (scope == null) {
@@ -40,16 +43,34 @@ class WorkflowsPanel(
         Disposer.register(this, statusIcon)
         Disposer.register(this, statusLabel)
 
+        val topPanel = JPanel().apply {
+            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+            if (AnalyticsConsentBanner.shouldShow()) {
+                consentBanner = AnalyticsConsentBanner { dismissConsentBanner() }
+                add(consentBanner)
+            }
+            add(toolbar)
+        }
+
         val bottomPanel = JPanel(BorderLayout()).apply {
             add(statusIcon, BorderLayout.WEST)
             add(statusLabel, BorderLayout.CENTER)
         }
 
-        add(toolbar, BorderLayout.NORTH)
+        add(topPanel, BorderLayout.NORTH)
         add(table, BorderLayout.CENTER)
         add(bottomPanel, BorderLayout.SOUTH)
 
         toolbar.load()
+    }
+
+    private fun dismissConsentBanner() {
+        consentBanner?.let { banner ->
+            banner.parent?.remove(banner)
+            consentBanner = null
+            revalidate()
+            repaint()
+        }
     }
 
     override fun dispose() {

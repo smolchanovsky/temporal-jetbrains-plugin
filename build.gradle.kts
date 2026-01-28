@@ -1,6 +1,7 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import java.util.Properties
 
 plugins {
     id("java") // Java support
@@ -139,7 +140,85 @@ kover {
     }
 }
 
+// Analytics configuration providers (configuration cache compatible)
+fun loadLocalProperty(name: String): Provider<String> = providers.provider {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        val props = Properties().apply { localPropertiesFile.inputStream().use { load(it) } }
+        props.getProperty(name)
+    } else null
+}
+
+val analyticsProjectToken: Provider<String> = loadLocalProperty("analytics.projectToken")
+    .orElse(providers.environmentVariable("ANALYTICS_PROJECT_TOKEN")).orElse("")
+
+val analyticsObfuscationKey: Provider<String> = loadLocalProperty("analytics.obfuscationKey")
+    .orElse(providers.environmentVariable("ANALYTICS_OBFUSCATION_KEY")).orElse("")
+
+val generateAnalyticsConfig by tasks.registering {
+    val outputDir = layout.buildDirectory.dir("generated/source/analytics")
+    val projectToken = analyticsProjectToken
+    val obfuscationKey = analyticsObfuscationKey
+
+    inputs.property("projectToken", projectToken)
+    inputs.property("obfuscationKey", obfuscationKey)
+    outputs.dir(outputDir)
+
+    doLast {
+        val dir = outputDir.get().asFile.resolve("com/github/smolchanovsky/temporalplugin/analytics")
+        dir.mkdirs()
+
+        val token = projectToken.get()
+        val key = obfuscationKey.get()
+
+        val tokenCode = if (key.isEmpty()) {
+            "    val projectToken: String = \"$token\""
+        } else {
+            val obfuscated = token.mapIndexed { i, c ->
+                (c.code xor key[i % key.length].code).toString(16).padStart(2, '0')
+            }.joinToString("")
+            val k1 = key.substring(0, key.length / 2).reversed()
+            val k2 = key.substring(key.length / 2).reversed()
+            """
+            |    private const val K1 = "$k1"
+            |    private const val K2 = "$k2"
+            |    private const val T = "$obfuscated"
+            |
+            |    val projectToken: String by lazy {
+            |        if (T.isEmpty()) return@lazy ""
+            |        val key = K1.reversed() + K2.reversed()
+            |        T.chunked(2).mapIndexed { i, c ->
+            |            (c.toInt(16) xor key[i % key.length].code).toChar()
+            |        }.joinToString("")
+            |    }
+            """.trimMargin()
+        }
+
+        dir.resolve("AnalyticsConfig.kt").writeText(
+            """
+            |package com.github.smolchanovsky.temporalplugin.analytics
+            |
+            |object AnalyticsConfig {
+            |$tokenCode
+            |}
+            |""".trimMargin()
+        )
+    }
+}
+
+sourceSets {
+    main {
+        kotlin {
+            srcDir(layout.buildDirectory.dir("generated/source/analytics"))
+        }
+    }
+}
+
 tasks {
+    compileKotlin {
+        dependsOn(generateAnalyticsConfig)
+    }
+
     wrapper {
         gradleVersion = providers.gradleProperty("gradleVersion").get()
     }

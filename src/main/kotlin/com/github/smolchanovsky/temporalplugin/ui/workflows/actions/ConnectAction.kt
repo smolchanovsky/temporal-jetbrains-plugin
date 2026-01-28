@@ -6,30 +6,28 @@ import com.github.smolchanovsky.temporalplugin.state.ConnectionState
 import com.github.smolchanovsky.temporalplugin.state.TemporalState
 import com.github.smolchanovsky.temporalplugin.state.TemporalStateReader
 import com.github.smolchanovsky.temporalplugin.usecase.ConnectUseCase
+import com.github.smolchanovsky.temporalplugin.ui.analytics.base.TrackedAction
 import com.github.smolchanovsky.temporalplugin.ui.common.onFailureNotify
 import com.intellij.icons.AllIcons
-import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.currentThreadCoroutineScope
-import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
 import kotlinx.coroutines.launch
 
 class ConnectAction(
     private val project: Project
-) : DumbAwareAction(
-    TextBundle.message("action.connect"),
-    TextBundle.message("action.connect.description"),
-    AllIcons.Actions.ProfileBlue
+) : TrackedAction(
+    analyticsName = "connect",
+    text = TextBundle.message("action.connect"),
+    description = TextBundle.message("action.connect.description"),
+    icon = AllIcons.Actions.ProfileBlue
 ) {
 
     private val state: TemporalStateReader = project.service<TemporalState>()
     private val mediator = project.service<TemporalMediator>().mediator
 
-    override fun getActionUpdateThread() = ActionUpdateThread.EDT
-
-    override fun actionPerformed(e: AnActionEvent) {
+    override fun doActionPerformed(e: AnActionEvent) {
         currentThreadCoroutineScope().launch {
             mediator.send(ConnectUseCase(state.selectedEnvironment, state.selectedNamespace))
                 .onFailureNotify(project)

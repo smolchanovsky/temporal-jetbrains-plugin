@@ -1,0 +1,4 @@
+# Analytics configuration (copy to local.properties and fill in your values)
+
+analytics.projectToken=your_project_token_here
+analytics.obfuscationKey=your_obfuscation_key_here

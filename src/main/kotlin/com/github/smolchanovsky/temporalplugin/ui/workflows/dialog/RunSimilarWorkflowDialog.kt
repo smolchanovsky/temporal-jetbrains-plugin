@@ -2,6 +2,7 @@ package com.github.smolchanovsky.temporalplugin.ui.workflows.dialog
 
 import com.github.smolchanovsky.temporalplugin.TemporalMediator
 import com.github.smolchanovsky.temporalplugin.TextBundle
+import com.github.smolchanovsky.temporalplugin.ui.analytics.base.TrackedDialog
 import com.github.smolchanovsky.temporalplugin.ui.common.onFailureNotify
 import com.github.smolchanovsky.temporalplugin.usecase.GenerateWorkflowDataResult
 import com.github.smolchanovsky.temporalplugin.usecase.RunSimilarWorkflowRequest
@@ -9,7 +10,6 @@ import com.intellij.json.JsonLanguage
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBLabel
@@ -27,7 +27,7 @@ class RunSimilarWorkflowDialog(
     private val project: Project,
     private val scope: CoroutineScope,
     data: GenerateWorkflowDataResult
-) : DialogWrapper(project) {
+) : TrackedDialog(analyticsName = "run_similar", project = project) {
 
     private val mediator = project.service<TemporalMediator>().mediator
     private val json = Json { ignoreUnknownKeys = true }
@@ -51,7 +51,16 @@ class RunSimilarWorkflowDialog(
     init {
         title = TextBundle.message("dialog.runSimilar.title")
         setOKButtonText(TextBundle.message("dialog.runSimilar.start"))
+        trackOpen()
+        setupFieldTracking()
         init()
+    }
+
+    private fun setupFieldTracking() {
+        fieldTracker.track(workflowIdField, "workflow_id")
+        fieldTracker.track(workflowTypeField, "workflow_type")
+        fieldTracker.track(taskQueueField, "task_queue")
+        fieldTracker.track(inputEditor, "input")
     }
 
     override fun createCenterPanel(): JComponent {

@@ -1,9 +1,11 @@
 package com.github.smolchanovsky.temporalplugin.usecase
 
+import com.github.smolchanovsky.temporalplugin.analytics.AnalyticsState
+import com.github.smolchanovsky.temporalplugin.cli.GetCliVersionQuery
+import com.github.smolchanovsky.temporalplugin.cli.GetWorkflowsQuery
 import com.github.smolchanovsky.temporalplugin.domain.Environment
 import com.github.smolchanovsky.temporalplugin.domain.Namespace
 import com.github.smolchanovsky.temporalplugin.domain.Workflow
-import com.github.smolchanovsky.temporalplugin.cli.GetWorkflowsQuery
 import com.github.smolchanovsky.temporalplugin.state.ConnectionState
 import com.github.smolchanovsky.temporalplugin.state.TemporalStateWriter
 import com.trendyol.kediatr.Mediator
@@ -20,6 +22,8 @@ class ConnectUseCaseHandler(
     private val mediatorProvider: () -> Mediator
 ) : RequestHandler<ConnectUseCase, Result<List<Workflow>>> {
 
+    private val analyticsState = AnalyticsState.getInstance()
+
     override suspend fun handle(request: ConnectUseCase): Result<List<Workflow>> {
         state.updateConnectionState(ConnectionState.Connecting(request.namespace.name))
 
@@ -28,10 +32,17 @@ class ConnectUseCaseHandler(
         result.onSuccess { workflows ->
             state.updateConnectionState(ConnectionState.Connected(request.environment, request.namespace))
             state.updateWorkflows(workflows)
+            fetchAndSetCliVersion()
         }.onFailure {
             state.updateConnectionState(ConnectionState.Disconnected)
         }
 
         return result
+    }
+
+    private suspend fun fetchAndSetCliVersion() {
+        mediatorProvider().send(GetCliVersionQuery).onSuccess { version ->
+            analyticsState.temporalCliVersion = version
+        }
     }
 }

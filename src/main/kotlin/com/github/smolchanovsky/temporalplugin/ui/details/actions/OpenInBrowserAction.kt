@@ -1,32 +1,30 @@
 package com.github.smolchanovsky.temporalplugin.ui.details.actions
 
 import com.github.smolchanovsky.temporalplugin.TextBundle
-import com.github.smolchanovsky.temporalplugin.ui.settings.TemporalSettings
 import com.github.smolchanovsky.temporalplugin.state.ConnectionState
 import com.github.smolchanovsky.temporalplugin.state.TemporalState
 import com.github.smolchanovsky.temporalplugin.state.ViewState
+import com.github.smolchanovsky.temporalplugin.ui.analytics.base.TrackedAction
+import com.github.smolchanovsky.temporalplugin.ui.settings.TemporalSettings
 import com.intellij.icons.AllIcons
 import com.intellij.ide.BrowserUtil
-import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.service
-import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
 
 class OpenInBrowserAction(
     private val project: Project
-) : DumbAwareAction(
-    TextBundle.message("action.openInBrowser"),
-    TextBundle.message("action.openInBrowser.description"),
-    AllIcons.Ide.External_link_arrow
+) : TrackedAction(
+    analyticsName = "open_in_browser",
+    text = TextBundle.message("action.openInBrowser"),
+    description = TextBundle.message("action.openInBrowser.description"),
+    icon = AllIcons.Ide.External_link_arrow
 ) {
 
     private val state = project.service<TemporalState>()
     private val settings = TemporalSettings.getInstance(project)
 
-    override fun getActionUpdateThread() = ActionUpdateThread.EDT
-
-    override fun actionPerformed(e: AnActionEvent) {
+    override fun doActionPerformed(e: AnActionEvent) {
         val viewState = state.viewState
         val connectionState = state.connectionState
 

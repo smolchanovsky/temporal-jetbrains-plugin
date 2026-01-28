@@ -1,6 +1,7 @@
 package com.github.smolchanovsky.temporalplugin
 
 import com.github.smolchanovsky.temporalplugin.cli.CheckServerHealthQueryHandler
+import com.github.smolchanovsky.temporalplugin.cli.GetCliVersionQueryHandler
 import com.github.smolchanovsky.temporalplugin.cli.GetEnvironmentsQueryHandler
 import com.github.smolchanovsky.temporalplugin.cli.GetNamespacesQueryHandler
 import com.github.smolchanovsky.temporalplugin.cli.GetWorkflowDetailsQueryHandler
@@ -33,6 +34,7 @@ class TemporalMediator(project: Project) {
         instance = HandlerRegistryProvider.Companion.createMediator(
             handlers = listOf(
                 CheckServerHealthQueryHandler(cli),
+                GetCliVersionQueryHandler(cli),
                 GetEnvironmentsQueryHandler(cli),
                 GetNamespacesQueryHandler(cli),
                 GetWorkflowsQueryHandler(cli),

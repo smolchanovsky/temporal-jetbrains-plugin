@@ -1,21 +1,25 @@
 package com.github.smolchanovsky.temporalplugin.ui.settings
 
 import com.github.smolchanovsky.temporalplugin.TextBundle
+import com.github.smolchanovsky.temporalplugin.analytics.AnalyticsSettings
+import com.github.smolchanovsky.temporalplugin.ui.analytics.base.TrackedConfigurable
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
-import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.dsl.builder.RightGap
 import com.intellij.ui.dsl.builder.bindIntText
+import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.columns
 import com.intellij.ui.dsl.builder.panel
 
-class TemporalSettingsConfigurable(project: Project) : BoundConfigurable(
-    TextBundle.message("settings.title")
+class TemporalSettingsConfigurable(project: Project) : TrackedConfigurable(
+    analyticsName = "settings",
+    displayName = TextBundle.message("settings.title")
 ) {
 
     private val settings = TemporalSettings.getInstance(project)
+    private val analyticsSettings = AnalyticsSettings.getInstance()
 
     override fun createPanel(): DialogPanel = panel {
         group(TextBundle.message("settings.cli.group")) {
@@ -61,6 +65,13 @@ class TemporalSettingsConfigurable(project: Project) : BoundConfigurable(
                 text(TextBundle.message("settings.refresh.interval.seconds"))
                     .gap(RightGap.SMALL)
                 contextHelp(TextBundle.message("settings.refresh.interval.help"))
+            }
+        }
+        group(TextBundle.message("settings.analytics.group")) {
+            row {
+                checkBox(TextBundle.message("settings.analytics.enabled"))
+                    .bindSelected(analyticsSettings::analyticsEnabled)
+                    .comment(TextBundle.message("settings.analytics.help"))
             }
         }
     }

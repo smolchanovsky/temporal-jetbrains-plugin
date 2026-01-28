@@ -1,5 +1,7 @@
 package com.github.smolchanovsky.temporalplugin.state
 
+import com.github.smolchanovsky.temporalplugin.analytics.AnalyticsService
+import com.github.smolchanovsky.temporalplugin.analytics.StateChangeEvent
 import com.github.smolchanovsky.temporalplugin.domain.Environment
 import com.github.smolchanovsky.temporalplugin.domain.Namespace
 import com.github.smolchanovsky.temporalplugin.domain.Workflow
@@ -22,6 +24,7 @@ class TemporalState : TemporalStateWriter, PersistentStateComponent<TemporalStat
     )
 
     private var persistentState = PersistentState()
+    private val analytics = AnalyticsService.getInstance()
 
     private val cliAvailableListeners = CopyOnWriteArrayList<(Boolean) -> Unit>()
     private val connectionStateListeners = CopyOnWriteArrayList<(ConnectionState) -> Unit>()
@@ -30,7 +33,6 @@ class TemporalState : TemporalStateWriter, PersistentStateComponent<TemporalStat
     private val namespaceListeners = CopyOnWriteArrayList<() -> Unit>()
     private val viewStateListeners = CopyOnWriteArrayList<(ViewState) -> Unit>()
 
-    // CLI availability
     @Volatile
     private var _cliAvailable: Boolean = false
     override val cliAvailable: Boolean
@@ -71,6 +73,9 @@ class TemporalState : TemporalStateWriter, PersistentStateComponent<TemporalStat
     override fun updateConnectionState(state: ConnectionState) {
         thisLogger().info("connectionState: $_connectionState -> $state")
         _connectionState = state
+
+        analytics.track(StateChangeEvent("connection_state", mapOf("state" to state::class.simpleName!!)))
+
         if (SwingUtilities.isEventDispatchThread()) {
             notifyConnectionStateListeners(state)
         } else {
@@ -81,6 +86,9 @@ class TemporalState : TemporalStateWriter, PersistentStateComponent<TemporalStat
     override fun updateWorkflows(workflows: List<Workflow>) {
         thisLogger().info("workflows: ${_workflows.size} -> ${workflows.size}")
         _workflows = workflows
+
+        analytics.track(StateChangeEvent("workflows_loaded", mapOf("count" to workflows.size)))
+
         if (SwingUtilities.isEventDispatchThread()) {
             notifyWorkflowsListeners(workflows)
         } else {
@@ -122,6 +130,7 @@ class TemporalState : TemporalStateWriter, PersistentStateComponent<TemporalStat
             thisLogger().info("selectedEnvironment: ${persistentState.selectedEnvironment} -> ${value.name}")
             if (persistentState.selectedEnvironment != value.name) {
                 persistentState.selectedEnvironment = value.name
+                analytics.track(StateChangeEvent("environment_changed", mapOf("is_local" to (value == Environment.LOCAL))))
                 environmentListeners.forEach { it() }
             }
         }
@@ -132,6 +141,7 @@ class TemporalState : TemporalStateWriter, PersistentStateComponent<TemporalStat
             thisLogger().info("selectedNamespace: ${persistentState.selectedNamespace} -> ${value.name}")
             if (persistentState.selectedNamespace != value.name) {
                 persistentState.selectedNamespace = value.name
+                analytics.track(StateChangeEvent("namespace_changed", mapOf("is_default" to (value == Namespace.DEFAULT))))
                 namespaceListeners.forEach { it() }
             }
         }

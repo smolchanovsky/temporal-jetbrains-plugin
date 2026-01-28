@@ -56,6 +56,9 @@ jobs:
 
       # Build plugin
       - name: Build plugin
+        env:
+          ANALYTICS_PROJECT_TOKEN: ${{ secrets.ANALYTICS_PROJECT_TOKEN_DEV }}
+          ANALYTICS_OBFUSCATION_KEY: ${{ secrets.ANALYTICS_OBFUSCATION_KEY_DEV }}
         run: ./gradlew buildPlugin
 
       # Prepare plugin archive content for creating artifact
