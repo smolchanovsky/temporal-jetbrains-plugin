@@ -82,6 +82,7 @@ class WorkflowDetailsPanel(
         add(tabbedPane, BorderLayout.CENTER)
 
         state.addViewStateListener(onViewStateChanged)
+        onViewStateChanged(state.viewState)
     }
 
     private fun loadDetails(viewState: ViewState.WorkflowDetailsView) {
