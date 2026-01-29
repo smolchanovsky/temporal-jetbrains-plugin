@@ -22,7 +22,8 @@
         <toolWindow factoryClass="com.github.smolchanovsky.temporalplugin.ui.toolWindow.TemporalToolWindowFactory"
                     id="TemporalToolWindow"
                     anchor="bottom"
-                    icon="AllIcons.Actions.ProjectWideAnalysisOff"/>
+                    icon="AllIcons.Actions.ProjectWideAnalysisOff"
+                    canCloseContents="true"/>
         <projectConfigurable
                 parentId="tools"
                 instance="com.github.smolchanovsky.temporalplugin.ui.settings.TemporalSettingsConfigurable"

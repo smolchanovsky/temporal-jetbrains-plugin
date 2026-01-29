@@ -5,15 +5,18 @@ import com.github.smolchanovsky.temporalplugin.state.TemporalState
 import com.github.smolchanovsky.temporalplugin.state.ViewState
 import com.github.smolchanovsky.temporalplugin.ui.common.FormatUtils
 import com.github.smolchanovsky.temporalplugin.ui.common.WorkflowStatusPresentation
+import java.awt.FlowLayout
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
 import java.awt.BorderLayout
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
+import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.SwingUtilities
 
@@ -21,13 +24,29 @@ class MetadataPanel(project: Project) : JPanel(BorderLayout()), Disposable {
 
     private val state = project.service<TemporalState>()
 
-    private val statusLabel = JBLabel()
-    private val typeLabel = JBLabel()
-    private val taskQueueLabel = JBLabel()
-    private val runIdLabel = JBLabel()
-    private val startTimeLabel = JBLabel()
-    private val closeTimeLabel = JBLabel()
-    private val durationLabel = JBLabel()
+    private val statusIcon = JBLabel()
+    private val statusField = createCopyableField()
+    private val statusPanel = JPanel(FlowLayout(FlowLayout.LEFT, 2, 0)).apply {
+        isOpaque = false
+        add(statusIcon)
+        add(statusField)
+    }
+    private val typeField = createCopyableField()
+    private val taskQueueField = createCopyableField()
+    private val runIdField = createCopyableField()
+    private val startTimeField = createCopyableField()
+    private val closeTimeField = createCopyableField()
+    private val durationField = createCopyableField()
+
+    private fun createCopyableField(): JBTextField {
+        return JBTextField().apply {
+            isEditable = false
+            border = null
+            background = null
+            isOpaque = false
+            margin = JBUI.emptyInsets()
+        }
+    }
 
     private val onViewStateChanged: (ViewState) -> Unit = { viewState ->
         if (viewState is ViewState.WorkflowDetailsView) {
@@ -42,17 +61,17 @@ class MetadataPanel(project: Project) : JPanel(BorderLayout()), Disposable {
         val gbc = GridBagConstraints().apply {
             anchor = GridBagConstraints.WEST
             fill = GridBagConstraints.HORIZONTAL
-            insets = JBUI.insets(4)
+            insets = JBUI.insets(0, 4)
         }
 
         var row = 0
-        addRow(contentPanel, gbc, row++, TextBundle.message("details.status"), statusLabel)
-        addRow(contentPanel, gbc, row++, TextBundle.message("details.type"), typeLabel)
-        addRow(contentPanel, gbc, row++, TextBundle.message("details.taskQueue"), taskQueueLabel)
-        addRow(contentPanel, gbc, row++, TextBundle.message("details.runId"), runIdLabel)
-        addRow(contentPanel, gbc, row++, TextBundle.message("details.startTime"), startTimeLabel)
-        addRow(contentPanel, gbc, row++, TextBundle.message("details.closeTime"), closeTimeLabel)
-        addRow(contentPanel, gbc, row++, TextBundle.message("details.duration"), durationLabel)
+        addRow(contentPanel, gbc, row++, TextBundle.message("details.status"), statusPanel)
+        addRow(contentPanel, gbc, row++, TextBundle.message("details.type"), typeField)
+        addRow(contentPanel, gbc, row++, TextBundle.message("details.taskQueue"), taskQueueField)
+        addRow(contentPanel, gbc, row++, TextBundle.message("details.runId"), runIdField)
+        addRow(contentPanel, gbc, row++, TextBundle.message("details.startTime"), startTimeField)
+        addRow(contentPanel, gbc, row++, TextBundle.message("details.closeTime"), closeTimeField)
+        addRow(contentPanel, gbc, row++, TextBundle.message("details.duration"), durationField)
 
         gbc.gridy = row
         gbc.weighty = 1.0
@@ -64,7 +83,7 @@ class MetadataPanel(project: Project) : JPanel(BorderLayout()), Disposable {
         state.addViewStateListener(onViewStateChanged)
     }
 
-    private fun addRow(panel: JPanel, gbc: GridBagConstraints, row: Int, label: String, valueLabel: JBLabel) {
+    private fun addRow(panel: JPanel, gbc: GridBagConstraints, row: Int, label: String, valueComponent: JComponent) {
         gbc.gridy = row
         gbc.gridx = 0
         gbc.weightx = 0.0
@@ -74,7 +93,7 @@ class MetadataPanel(project: Project) : JPanel(BorderLayout()), Disposable {
 
         gbc.gridx = 1
         gbc.weightx = 1.0
-        panel.add(valueLabel, gbc)
+        panel.add(valueComponent, gbc)
     }
 
     private fun update(viewState: ViewState.WorkflowDetailsView) {
@@ -82,14 +101,14 @@ class MetadataPanel(project: Project) : JPanel(BorderLayout()), Disposable {
         val workflow = viewState.workflow
 
         val status = details?.status ?: workflow.status
-        statusLabel.text = status.displayName
-        statusLabel.icon = WorkflowStatusPresentation.getIcon(status)
-        typeLabel.text = details?.type ?: workflow.type
-        taskQueueLabel.text = details?.taskQueue ?: "-"
-        runIdLabel.text = details?.runId ?: workflow.runId
-        startTimeLabel.text = FormatUtils.formatDateTime(details?.startTime ?: workflow.startTime)
-        closeTimeLabel.text = (details?.closeTime ?: workflow.endTime)?.let { FormatUtils.formatDateTime(it) } ?: "-"
-        durationLabel.text = details?.executionDuration?.let { FormatUtils.formatDuration(it) } ?: "-"
+        statusIcon.icon = WorkflowStatusPresentation.getIcon(status)
+        statusField.text = status.displayName
+        typeField.text = details?.type ?: workflow.type
+        taskQueueField.text = details?.taskQueue ?: "-"
+        runIdField.text = details?.runId ?: workflow.runId
+        startTimeField.text = FormatUtils.formatDateTime(details?.startTime ?: workflow.startTime)
+        closeTimeField.text = (details?.closeTime ?: workflow.endTime)?.let { FormatUtils.formatDateTime(it) } ?: "-"
+        durationField.text = details?.executionDuration?.let { FormatUtils.formatDuration(it) } ?: "-"
     }
 
     override fun dispose() {

@@ -5,7 +5,6 @@ import com.github.smolchanovsky.temporalplugin.TemporalMediator
 import com.github.smolchanovsky.temporalplugin.state.TemporalState
 import com.github.smolchanovsky.temporalplugin.state.ViewState
 import com.github.smolchanovsky.temporalplugin.usecase.LoadWorkflowDetailsUseCase
-import com.github.smolchanovsky.temporalplugin.ui.details.actions.BackAction
 import com.github.smolchanovsky.temporalplugin.ui.details.actions.OpenInBrowserAction
 import com.github.smolchanovsky.temporalplugin.ui.details.actions.RefreshDetailsAction
 import com.github.smolchanovsky.temporalplugin.ui.workflows.actions.CancelWorkflowActionGroup
@@ -32,7 +31,6 @@ class WorkflowDetailsPanel(
     private val mediator = project.service<TemporalMediator>().mediator
 
     private val toolbar = WorkflowDetailsToolbar(
-        backAction = BackAction(project),
         refreshAction = RefreshDetailsAction(project, scope),
         rerunAction = RerunWorkflowAction(project, scope),
         cancelActionGroup = CancelWorkflowActionGroup(project, scope),
@@ -52,8 +50,6 @@ class WorkflowDetailsPanel(
         SwingUtilities.invokeLater {
             when (viewState) {
                 is ViewState.WorkflowDetailsView -> {
-                    toolbar.updateTitle(viewState.workflow.id)
-
                     // Trigger loading if just opened and not already loading this workflow
                     if (viewState.isLoading &&
                         viewState.details == null &&
@@ -69,7 +65,6 @@ class WorkflowDetailsPanel(
                 }
                 is ViewState.WorkflowList -> {
                     currentlyLoadingWorkflowRunId = null
-                    toolbar.updateTitle("")
                 }
             }
         }
