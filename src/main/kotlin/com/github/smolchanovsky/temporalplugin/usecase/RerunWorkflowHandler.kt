@@ -8,19 +8,19 @@ import com.trendyol.kediatr.Mediator
 import com.trendyol.kediatr.Request
 import com.trendyol.kediatr.RequestHandler
 
-data class RunSimilarWorkflowRequest(
+data class RerunWorkflowRequest(
     val workflowId: String,
     val workflowType: String,
     val taskQueue: String,
     val input: String?
 ) : Request<Result<StartWorkflowResult>>
 
-class RunSimilarWorkflowHandler(
+class RerunWorkflowHandler(
     private val state: TemporalStateReader,
     private val mediatorProvider: () -> Mediator
-) : RequestHandler<RunSimilarWorkflowRequest, Result<StartWorkflowResult>> {
+) : RequestHandler<RerunWorkflowRequest, Result<StartWorkflowResult>> {
 
-    override suspend fun handle(request: RunSimilarWorkflowRequest): Result<StartWorkflowResult> {
+    override suspend fun handle(request: RerunWorkflowRequest): Result<StartWorkflowResult> {
         val connectionState = state.connectionState
         if (connectionState !is ConnectionState.Connected) {
             return Result.failure(IllegalStateException("Not connected"))

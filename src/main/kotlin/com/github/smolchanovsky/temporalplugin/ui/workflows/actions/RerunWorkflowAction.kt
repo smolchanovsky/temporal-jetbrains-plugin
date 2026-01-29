@@ -6,7 +6,7 @@ import com.github.smolchanovsky.temporalplugin.state.ConnectionState
 import com.github.smolchanovsky.temporalplugin.state.TemporalState
 import com.github.smolchanovsky.temporalplugin.ui.analytics.base.TrackedAction
 import com.github.smolchanovsky.temporalplugin.ui.common.onFailureNotify
-import com.github.smolchanovsky.temporalplugin.ui.workflows.dialog.RunSimilarWorkflowDialog
+import com.github.smolchanovsky.temporalplugin.ui.workflows.dialog.RerunWorkflowDialog
 import com.github.smolchanovsky.temporalplugin.usecase.GenerateWorkflowDataRequest
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -16,14 +16,14 @@ import com.intellij.openapi.project.Project
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class RunSimilarWorkflowAction(
+class RerunWorkflowAction(
     private val project: Project,
     private val scope: CoroutineScope
 ) : TrackedAction(
-    analyticsName = "run_similar",
-    text = TextBundle.message("action.runSimilar"),
-    description = TextBundle.message("action.runSimilar.description"),
-    icon = AllIcons.Actions.Execute
+    analyticsName = "rerun_workflow",
+    text = TextBundle.message("action.rerun"),
+    description = TextBundle.message("action.rerun.description"),
+    icon = AllIcons.Actions.Rerun
 ) {
 
     private val state = project.service<TemporalState>()
@@ -43,7 +43,7 @@ class RunSimilarWorkflowAction(
             val data = result.getOrThrow()
 
             invokeLater {
-                RunSimilarWorkflowDialog(project, scope, data).show()
+                RerunWorkflowDialog(project, scope, data).show()
             }
         }
     }

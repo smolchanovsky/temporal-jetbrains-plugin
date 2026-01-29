@@ -19,7 +19,7 @@ import com.github.smolchanovsky.temporalplugin.usecase.DisconnectUseCaseHandler
 import com.github.smolchanovsky.temporalplugin.usecase.GenerateWorkflowDataHandler
 import com.github.smolchanovsky.temporalplugin.usecase.LoadWorkflowDetailsUseCaseHandler
 import com.github.smolchanovsky.temporalplugin.usecase.RefreshUseCaseHandler
-import com.github.smolchanovsky.temporalplugin.usecase.RunSimilarWorkflowHandler
+import com.github.smolchanovsky.temporalplugin.usecase.RerunWorkflowHandler
 import com.github.smolchanovsky.temporalplugin.usecase.TerminateWorkflowHandler
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
@@ -52,7 +52,7 @@ class TemporalMediator(project: Project) {
                 RefreshUseCaseHandler(state) { instance },
                 LoadWorkflowDetailsUseCaseHandler(state) { instance },
                 GenerateWorkflowDataHandler(state) { instance },
-                RunSimilarWorkflowHandler(state) { instance },
+                RerunWorkflowHandler(state) { instance },
                 CancelWorkflowHandler(state) { instance },
                 TerminateWorkflowHandler(state) { instance }
             )

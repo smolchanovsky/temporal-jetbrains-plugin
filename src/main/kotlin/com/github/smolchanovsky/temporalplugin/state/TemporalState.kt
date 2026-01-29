@@ -32,6 +32,7 @@ class TemporalState : TemporalStateWriter, PersistentStateComponent<TemporalStat
     private val environmentListeners = CopyOnWriteArrayList<() -> Unit>()
     private val namespaceListeners = CopyOnWriteArrayList<() -> Unit>()
     private val viewStateListeners = CopyOnWriteArrayList<(ViewState) -> Unit>()
+    private val selectedWorkflowListeners = CopyOnWriteArrayList<() -> Unit>()
 
     @Volatile
     private var _cliAvailable: Boolean = false
@@ -147,10 +148,24 @@ class TemporalState : TemporalStateWriter, PersistentStateComponent<TemporalStat
         }
 
 
-    override var selectedWorkflowRunId: String? = null
+    @Volatile
+    private var _selectedWorkflowRunId: String? = null
+    override var selectedWorkflowRunId: String?
+        get() = _selectedWorkflowRunId
+        set(value) {
+            if (_selectedWorkflowRunId != value) {
+                thisLogger().info("selectedWorkflowRunId: $_selectedWorkflowRunId -> $value")
+                _selectedWorkflowRunId = value
+                if (SwingUtilities.isEventDispatchThread()) {
+                    selectedWorkflowListeners.forEach { it() }
+                } else {
+                    SwingUtilities.invokeLater { selectedWorkflowListeners.forEach { it() } }
+                }
+            }
+        }
 
     override val selectedWorkflow: Workflow?
-        get() = selectedWorkflowRunId?.let { runId -> workflows.find { it.runId == runId } }
+        get() = _selectedWorkflowRunId?.let { runId -> workflows.find { it.runId == runId } }
 
 
     override fun addCliAvailableListener(listener: (Boolean) -> Unit) { cliAvailableListeners.add(listener) }
@@ -171,6 +186,9 @@ class TemporalState : TemporalStateWriter, PersistentStateComponent<TemporalStat
     override fun addViewStateListener(listener: (ViewState) -> Unit) { viewStateListeners.add(listener) }
     override fun removeViewStateListener(listener: (ViewState) -> Unit) { viewStateListeners.remove(listener) }
 
+    override fun addSelectedWorkflowListener(listener: () -> Unit) { selectedWorkflowListeners.add(listener) }
+    override fun removeSelectedWorkflowListener(listener: () -> Unit) { selectedWorkflowListeners.remove(listener) }
+
 
     override fun getState(): PersistentState = persistentState
 
@@ -186,5 +204,6 @@ class TemporalState : TemporalStateWriter, PersistentStateComponent<TemporalStat
         environmentListeners.clear()
         namespaceListeners.clear()
         viewStateListeners.clear()
+        selectedWorkflowListeners.clear()
     }
 }

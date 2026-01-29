@@ -42,11 +42,17 @@ class WorkflowsToolbar(
             rightToolbar.updateActionsAsync()
         }
     }
+    private val onSelectedWorkflowChanged: () -> Unit = {
+        SwingUtilities.invokeLater {
+            leftToolbar.updateActionsAsync()
+        }
+    }
 
     init {
         state.addEnvironmentListener(onEnvironmentChanged)
         state.addNamespaceListener(onNamespaceChanged)
         state.addConnectionStateListener(onConnectionStateChanged)
+        state.addSelectedWorkflowListener(onSelectedWorkflowChanged)
 
         envSelector = EnvironmentSelector(project, scope)
         nsSelector = NamespaceSelector(project, scope)
@@ -58,7 +64,7 @@ class WorkflowsToolbar(
             add(DisconnectAction(project))
             add(RefreshAction(project))
             addSeparator()
-            add(RunSimilarWorkflowAction(project, scope))
+            add(RerunWorkflowAction(project, scope))
             add(CancelWorkflowActionGroup(project, scope))
             add(GoToDefinitionAction(project))
             addSeparator()
@@ -104,5 +110,6 @@ class WorkflowsToolbar(
         state.removeEnvironmentListener(onEnvironmentChanged)
         state.removeNamespaceListener(onNamespaceChanged)
         state.removeConnectionStateListener(onConnectionStateChanged)
+        state.removeSelectedWorkflowListener(onSelectedWorkflowChanged)
     }
 }

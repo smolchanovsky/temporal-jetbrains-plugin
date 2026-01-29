@@ -12,7 +12,7 @@ import javax.swing.JPanel
 class WorkflowDetailsToolbar(
     backAction: AnAction,
     refreshAction: AnAction,
-    runSimilarAction: AnAction,
+    rerunAction: AnAction,
     cancelActionGroup: AnAction,
     goToDefinitionAction: AnAction,
     openInBrowserAction: AnAction
@@ -25,7 +25,7 @@ class WorkflowDetailsToolbar(
             add(backAction)
             addSeparator()
             add(refreshAction)
-            add(runSimilarAction)
+            add(rerunAction)
             add(cancelActionGroup)
             add(goToDefinitionAction)
             add(openInBrowserAction)

@@ -5,7 +5,7 @@ import com.github.smolchanovsky.temporalplugin.TextBundle
 import com.github.smolchanovsky.temporalplugin.ui.analytics.base.TrackedDialog
 import com.github.smolchanovsky.temporalplugin.ui.common.onFailureNotify
 import com.github.smolchanovsky.temporalplugin.usecase.GenerateWorkflowDataResult
-import com.github.smolchanovsky.temporalplugin.usecase.RunSimilarWorkflowRequest
+import com.github.smolchanovsky.temporalplugin.usecase.RerunWorkflowRequest
 import com.intellij.json.JsonLanguage
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.ex.EditorEx
@@ -23,11 +23,11 @@ import kotlinx.serialization.json.Json
 import java.awt.Dimension
 import javax.swing.JComponent
 
-class RunSimilarWorkflowDialog(
+class RerunWorkflowDialog(
     private val project: Project,
     private val scope: CoroutineScope,
     data: GenerateWorkflowDataResult
-) : TrackedDialog(analyticsName = "run_similar", project = project) {
+) : TrackedDialog(analyticsName = "rerun_workflow", project = project) {
 
     private val mediator = project.service<TemporalMediator>().mediator
     private val json = Json { ignoreUnknownKeys = true }
@@ -49,8 +49,8 @@ class RunSimilarWorkflowDialog(
     }
 
     init {
-        title = TextBundle.message("dialog.runSimilar.title")
-        setOKButtonText(TextBundle.message("dialog.runSimilar.start"))
+        title = TextBundle.message("dialog.rerun.title")
+        setOKButtonText(TextBundle.message("dialog.rerun.start"))
         trackOpen()
         setupFieldTracking()
         init()
@@ -65,23 +65,23 @@ class RunSimilarWorkflowDialog(
 
     override fun createCenterPanel(): JComponent {
         return panel {
-            row(TextBundle.message("dialog.runSimilar.workflowId")) {
+            row(TextBundle.message("dialog.rerun.workflowId")) {
                 cell(workflowIdField)
                     .align(AlignX.FILL)
                     .resizableColumn()
             }
-            row(TextBundle.message("dialog.runSimilar.workflowType")) {
+            row(TextBundle.message("dialog.rerun.workflowType")) {
                 cell(workflowTypeField)
                     .align(AlignX.FILL)
                     .resizableColumn()
             }
-            row(TextBundle.message("dialog.runSimilar.taskQueue")) {
+            row(TextBundle.message("dialog.rerun.taskQueue")) {
                 cell(taskQueueField)
                     .align(AlignX.FILL)
                     .resizableColumn()
             }
             row {
-                cell(JBLabel(TextBundle.message("dialog.runSimilar.input")))
+                cell(JBLabel(TextBundle.message("dialog.rerun.input")))
                     .align(AlignY.TOP)
             }
             row {
@@ -96,19 +96,19 @@ class RunSimilarWorkflowDialog(
     override fun doValidate(): ValidationInfo? {
         if (workflowIdField.text.isBlank()) {
             return ValidationInfo(
-                TextBundle.message("dialog.runSimilar.validation.workflowIdRequired"),
+                TextBundle.message("dialog.rerun.validation.workflowIdRequired"),
                 workflowIdField
             )
         }
         if (workflowTypeField.text.isBlank()) {
             return ValidationInfo(
-                TextBundle.message("dialog.runSimilar.validation.workflowTypeRequired"),
+                TextBundle.message("dialog.rerun.validation.workflowTypeRequired"),
                 workflowTypeField
             )
         }
         if (taskQueueField.text.isBlank()) {
             return ValidationInfo(
-                TextBundle.message("dialog.runSimilar.validation.taskQueueRequired"),
+                TextBundle.message("dialog.rerun.validation.taskQueueRequired"),
                 taskQueueField
             )
         }
@@ -117,7 +117,7 @@ class RunSimilarWorkflowDialog(
                 json.parseToJsonElement(inputEditor.text)
             } catch (e: Exception) {
                 return ValidationInfo(
-                    TextBundle.message("dialog.runSimilar.validation.invalidJson"),
+                    TextBundle.message("dialog.rerun.validation.invalidJson"),
                     inputEditor
                 )
             }
@@ -128,7 +128,7 @@ class RunSimilarWorkflowDialog(
     override fun doOKAction() {
         scope.launch {
             mediator.send(
-                RunSimilarWorkflowRequest(
+                RerunWorkflowRequest(
                     workflowId = workflowIdField.text.trim(),
                     workflowType = workflowTypeField.text.trim(),
                     taskQueue = taskQueueField.text.trim(),

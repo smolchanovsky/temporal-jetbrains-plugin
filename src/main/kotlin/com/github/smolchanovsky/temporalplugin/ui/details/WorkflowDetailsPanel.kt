@@ -10,7 +10,7 @@ import com.github.smolchanovsky.temporalplugin.ui.details.actions.OpenInBrowserA
 import com.github.smolchanovsky.temporalplugin.ui.details.actions.RefreshDetailsAction
 import com.github.smolchanovsky.temporalplugin.ui.workflows.actions.CancelWorkflowActionGroup
 import com.github.smolchanovsky.temporalplugin.ui.workflows.actions.GoToDefinitionAction
-import com.github.smolchanovsky.temporalplugin.ui.workflows.actions.RunSimilarWorkflowAction
+import com.github.smolchanovsky.temporalplugin.ui.workflows.actions.RerunWorkflowAction
 import com.github.smolchanovsky.temporalplugin.ui.common.onFailureNotify
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.service
@@ -34,7 +34,7 @@ class WorkflowDetailsPanel(
     private val toolbar = WorkflowDetailsToolbar(
         backAction = BackAction(project),
         refreshAction = RefreshDetailsAction(project, scope),
-        runSimilarAction = RunSimilarWorkflowAction(project, scope),
+        rerunAction = RerunWorkflowAction(project, scope),
         cancelActionGroup = CancelWorkflowActionGroup(project, scope),
         goToDefinitionAction = GoToDefinitionAction(project),
         openInBrowserAction = OpenInBrowserAction(project)

@@ -31,4 +31,7 @@ interface TemporalStateReader {
 
     fun addViewStateListener(listener: (ViewState) -> Unit)
     fun removeViewStateListener(listener: (ViewState) -> Unit)
+
+    fun addSelectedWorkflowListener(listener: () -> Unit)
+    fun removeSelectedWorkflowListener(listener: () -> Unit)
 }
