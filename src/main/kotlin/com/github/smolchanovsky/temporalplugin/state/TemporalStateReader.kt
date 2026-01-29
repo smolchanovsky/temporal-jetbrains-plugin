@@ -3,6 +3,7 @@ package com.github.smolchanovsky.temporalplugin.state
 import com.github.smolchanovsky.temporalplugin.domain.Environment
 import com.github.smolchanovsky.temporalplugin.domain.Namespace
 import com.github.smolchanovsky.temporalplugin.domain.Workflow
+import com.github.smolchanovsky.temporalplugin.domain.WorkflowStatus
 
 interface TemporalStateReader {
     val cliAvailable: Boolean
@@ -13,6 +14,8 @@ interface TemporalStateReader {
     var selectedWorkflowRunId: String?
     val selectedWorkflow: Workflow?
     val viewState: ViewState
+    var filterStatus: WorkflowStatus?
+    var searchQuery: String
 
     fun addCliAvailableListener(listener: (Boolean) -> Unit)
     fun removeCliAvailableListener(listener: (Boolean) -> Unit)
@@ -34,4 +37,7 @@ interface TemporalStateReader {
 
     fun addSelectedWorkflowListener(listener: () -> Unit)
     fun removeSelectedWorkflowListener(listener: () -> Unit)
+
+    fun addFilterListener(listener: () -> Unit)
+    fun removeFilterListener(listener: () -> Unit)
 }

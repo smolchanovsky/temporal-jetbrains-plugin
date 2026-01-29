@@ -5,6 +5,7 @@ import com.github.smolchanovsky.temporalplugin.analytics.StateChangeEvent
 import com.github.smolchanovsky.temporalplugin.domain.Environment
 import com.github.smolchanovsky.temporalplugin.domain.Namespace
 import com.github.smolchanovsky.temporalplugin.domain.Workflow
+import com.github.smolchanovsky.temporalplugin.domain.WorkflowStatus
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
@@ -33,6 +34,7 @@ class TemporalState : TemporalStateWriter, PersistentStateComponent<TemporalStat
     private val namespaceListeners = CopyOnWriteArrayList<() -> Unit>()
     private val viewStateListeners = CopyOnWriteArrayList<(ViewState) -> Unit>()
     private val selectedWorkflowListeners = CopyOnWriteArrayList<() -> Unit>()
+    private val filterListeners = CopyOnWriteArrayList<() -> Unit>()
 
     @Volatile
     private var _cliAvailable: Boolean = false
@@ -167,6 +169,37 @@ class TemporalState : TemporalStateWriter, PersistentStateComponent<TemporalStat
     override val selectedWorkflow: Workflow?
         get() = _selectedWorkflowRunId?.let { runId -> workflows.find { it.runId == runId } }
 
+    @Volatile
+    private var _filterStatus: WorkflowStatus? = null
+    override var filterStatus: WorkflowStatus?
+        get() = _filterStatus
+        set(value) {
+            if (_filterStatus != value) {
+                thisLogger().info("filterStatus: $_filterStatus -> $value")
+                _filterStatus = value
+                notifyFilterListeners()
+            }
+        }
+
+    @Volatile
+    private var _searchQuery: String = ""
+    override var searchQuery: String
+        get() = _searchQuery
+        set(value) {
+            if (_searchQuery != value) {
+                thisLogger().info("searchQuery: '$_searchQuery' -> '$value'")
+                _searchQuery = value
+                notifyFilterListeners()
+            }
+        }
+
+    private fun notifyFilterListeners() {
+        if (SwingUtilities.isEventDispatchThread()) {
+            filterListeners.forEach { it() }
+        } else {
+            SwingUtilities.invokeLater { filterListeners.forEach { it() } }
+        }
+    }
 
     override fun addCliAvailableListener(listener: (Boolean) -> Unit) { cliAvailableListeners.add(listener) }
     override fun removeCliAvailableListener(listener: (Boolean) -> Unit) { cliAvailableListeners.remove(listener) }
@@ -189,6 +222,9 @@ class TemporalState : TemporalStateWriter, PersistentStateComponent<TemporalStat
     override fun addSelectedWorkflowListener(listener: () -> Unit) { selectedWorkflowListeners.add(listener) }
     override fun removeSelectedWorkflowListener(listener: () -> Unit) { selectedWorkflowListeners.remove(listener) }
 
+    override fun addFilterListener(listener: () -> Unit) { filterListeners.add(listener) }
+    override fun removeFilterListener(listener: () -> Unit) { filterListeners.remove(listener) }
+
 
     override fun getState(): PersistentState = persistentState
 
@@ -205,5 +241,6 @@ class TemporalState : TemporalStateWriter, PersistentStateComponent<TemporalStat
         namespaceListeners.clear()
         viewStateListeners.clear()
         selectedWorkflowListeners.clear()
+        filterListeners.clear()
     }
 }

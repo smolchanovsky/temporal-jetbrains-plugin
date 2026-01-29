@@ -6,6 +6,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.util.io.awaitExit
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.util.concurrent.CancellationException
 
 class CliExecutor(private val config: TemporalCliConfig) {
 
@@ -30,6 +31,8 @@ class CliExecutor(private val config: TemporalCliConfig) {
             } else {
                 Result.failure(buildError(exitCode, output, errorOutput))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             LOG.error("Error executing CLI command", e)
             if (e.message?.contains("Cannot run program") == true) {

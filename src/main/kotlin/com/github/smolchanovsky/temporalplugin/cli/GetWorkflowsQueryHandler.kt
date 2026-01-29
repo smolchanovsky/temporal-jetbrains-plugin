@@ -15,7 +15,9 @@ import java.time.Instant
 
 data class GetWorkflowsQuery(
     val environment: Environment,
-    val namespace: Namespace
+    val namespace: Namespace,
+    val status: WorkflowStatus? = null,
+    val searchPrefix: String? = null
 ) : Request<Result<List<Workflow>>>
 
 @Serializable
@@ -61,6 +63,13 @@ class GetWorkflowsQueryHandler(
         val args = buildList {
             addAll(listOf("workflow", "list"))
             addAll(listOf("--namespace", request.namespace.name))
+            addAll(listOf("--limit", "100"))
+
+            val query = buildQuery(request.status, request.searchPrefix)
+            if (query.isNotEmpty()) {
+                addAll(listOf("--query", query))
+            }
+
             addAll(listOf("--output", "json"))
             if (!request.environment.isLocal) {
                 addAll(listOf("--env", request.environment.name))
@@ -68,6 +77,21 @@ class GetWorkflowsQueryHandler(
         }
 
         return cli.execute(*args.toTypedArray()).map { parseWorkflowList(it) }
+    }
+
+    private fun buildQuery(status: WorkflowStatus?, searchPrefix: String?): String {
+        val parts = mutableListOf<String>()
+
+        status?.let {
+            parts.add("ExecutionStatus = '${it.cliValue}'")
+        }
+
+        searchPrefix?.takeIf { it.isNotBlank() }?.let { prefix ->
+            val escaped = prefix.replace("'", "\\'")
+            parts.add("(WorkflowId STARTS_WITH '$escaped' OR WorkflowType STARTS_WITH '$escaped' OR TaskQueue STARTS_WITH '$escaped')")
+        }
+
+        return parts.joinToString(" AND ")
     }
 
     private fun parseWorkflowList(jsonOutput: String): List<Workflow> {

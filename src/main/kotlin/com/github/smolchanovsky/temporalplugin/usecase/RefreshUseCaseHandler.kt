@@ -24,10 +24,12 @@ class RefreshUseCaseHandler(
 
         val env = state.selectedEnvironment
         val ns = state.selectedNamespace
+        val status = state.filterStatus
+        val searchPrefix = state.searchQuery.takeIf { it.isNotBlank() }
 
         state.updateConnectionState(ConnectionState.Refreshing(env, ns))
 
-        val result = mediatorProvider().send(GetWorkflowsQuery(env, ns))
+        val result = mediatorProvider().send(GetWorkflowsQuery(env, ns, status, searchPrefix))
 
         result.onSuccess { workflows ->
             state.updateWorkflows(workflows)

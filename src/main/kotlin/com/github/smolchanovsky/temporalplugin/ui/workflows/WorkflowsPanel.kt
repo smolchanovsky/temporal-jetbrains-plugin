@@ -26,6 +26,7 @@ class WorkflowsPanel(
     private val effectiveScope = scope ?: CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val toolbar = WorkflowsToolbar(project, effectiveScope)
+    private val filterPanel = WorkflowFilterPanel(project, effectiveScope)
     private val table = WorkflowList(project)
     private val statusIcon = ConnectionStatusIcon(project)
     private val statusLabel = ConnectionInfoLabel(project)
@@ -37,6 +38,7 @@ class WorkflowsPanel(
         }
 
         Disposer.register(this, toolbar)
+        Disposer.register(this, filterPanel)
         Disposer.register(this, table)
         Disposer.register(this, statusIcon)
         Disposer.register(this, statusLabel)
@@ -44,6 +46,7 @@ class WorkflowsPanel(
         val topPanel = JPanel().apply {
             layout = BoxLayout(this, BoxLayout.Y_AXIS)
             add(toolbar)
+            add(filterPanel)
             if (AnalyticsConsentBanner.shouldShow()) {
                 consentBanner = AnalyticsConsentBanner { dismissConsentBanner() }
                 add(consentBanner)
