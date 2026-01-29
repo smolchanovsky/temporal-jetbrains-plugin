@@ -4,6 +4,7 @@ import com.github.smolchanovsky.temporalplugin.TemporalMediator
 import com.github.smolchanovsky.temporalplugin.TextBundle
 import com.github.smolchanovsky.temporalplugin.analytics.ActionEvent
 import com.github.smolchanovsky.temporalplugin.analytics.AnalyticsService
+import com.github.smolchanovsky.temporalplugin.domain.WorkflowStatus
 import com.github.smolchanovsky.temporalplugin.state.ConnectionState
 import com.github.smolchanovsky.temporalplugin.state.TemporalState
 import com.github.smolchanovsky.temporalplugin.ui.analytics.base.TrackedAction
@@ -42,8 +43,8 @@ class CancelWorkflowActionGroup(
         val connectionState = state.connectionState
         val connected = connectionState is ConnectionState.Connected ||
             connectionState is ConnectionState.Refreshing
-        val hasSelection = state.selectedWorkflow != null
-        e.presentation.isEnabled = connected && hasSelection
+        val isRunning = state.selectedWorkflow?.status == WorkflowStatus.RUNNING
+        e.presentation.isEnabled = connected && isRunning
     }
 }
 
@@ -81,8 +82,8 @@ private class CancelWorkflowAction(
         val connectionState = state.connectionState
         val connected = connectionState is ConnectionState.Connected ||
             connectionState is ConnectionState.Refreshing
-        val hasSelection = state.selectedWorkflow != null
-        e.presentation.isEnabled = connected && hasSelection
+        val isRunning = state.selectedWorkflow?.status == WorkflowStatus.RUNNING
+        e.presentation.isEnabled = connected && isRunning
     }
 }
 
@@ -110,7 +111,7 @@ private class TerminateWorkflowAction(
         val connectionState = state.connectionState
         val connected = connectionState is ConnectionState.Connected ||
             connectionState is ConnectionState.Refreshing
-        val hasSelection = state.selectedWorkflow != null
-        e.presentation.isEnabled = connected && hasSelection
+        val isRunning = state.selectedWorkflow?.status == WorkflowStatus.RUNNING
+        e.presentation.isEnabled = connected && isRunning
     }
 }
