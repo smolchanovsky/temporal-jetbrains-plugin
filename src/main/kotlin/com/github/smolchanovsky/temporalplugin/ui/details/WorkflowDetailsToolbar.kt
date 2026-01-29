@@ -23,12 +23,12 @@ class WorkflowDetailsToolbar(
     init {
         val actionGroup = DefaultActionGroup().apply {
             add(backAction)
-            addSeparator()
             add(refreshAction)
+            addSeparator()
+            add(openInBrowserAction)
+            add(goToDefinitionAction)
             add(rerunAction)
             add(cancelActionGroup)
-            add(goToDefinitionAction)
-            add(openInBrowserAction)
         }
 
         val toolbar = ActionManager.getInstance()

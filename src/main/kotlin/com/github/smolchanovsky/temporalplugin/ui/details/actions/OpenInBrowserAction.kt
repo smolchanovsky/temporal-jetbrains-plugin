@@ -18,7 +18,7 @@ class OpenInBrowserAction(
     analyticsName = "open_in_browser",
     text = TextBundle.message("action.openInBrowser"),
     description = TextBundle.message("action.openInBrowser.description"),
-    icon = AllIcons.Ide.External_link_arrow
+    icon = AllIcons.General.Web
 ) {
 
     private val state = project.service<TemporalState>()
