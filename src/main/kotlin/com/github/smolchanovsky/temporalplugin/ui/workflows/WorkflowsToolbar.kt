@@ -64,6 +64,7 @@ class WorkflowsToolbar(
             add(DisconnectAction(project))
             add(RefreshAction(project))
             addSeparator()
+            add(OpenDetailsAction(project))
             add(RerunWorkflowAction(project, scope))
             add(CancelWorkflowActionGroup(project, scope))
             add(GoToDefinitionAction(project))
