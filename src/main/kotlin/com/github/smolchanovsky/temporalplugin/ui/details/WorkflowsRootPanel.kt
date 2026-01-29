@@ -27,9 +27,7 @@ class WorkflowsRootPanel(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val cardLayout = layout as CardLayout
 
-    private val listPanel = WorkflowsPanel(project, scope) { workflow ->
-        state.updateViewState(ViewState.WorkflowDetailsView(workflow, isLoading = true))
-    }
+    private val listPanel = WorkflowsPanel(project, scope)
 
     private val detailsPanel = WorkflowDetailsPanel(project, scope)
 

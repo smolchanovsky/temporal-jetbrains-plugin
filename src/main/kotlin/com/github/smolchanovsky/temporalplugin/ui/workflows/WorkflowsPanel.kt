@@ -1,6 +1,5 @@
 package com.github.smolchanovsky.temporalplugin.ui.workflows
 
-import com.github.smolchanovsky.temporalplugin.domain.Workflow
 import com.github.smolchanovsky.temporalplugin.services.AutoRefreshService
 import com.github.smolchanovsky.temporalplugin.ui.analytics.AnalyticsConsentBanner
 import com.github.smolchanovsky.temporalplugin.ui.settings.TemporalSettings
@@ -18,8 +17,7 @@ import javax.swing.JPanel
 
 class WorkflowsPanel(
     project: Project,
-    scope: CoroutineScope? = null,
-    onWorkflowDoubleClick: ((Workflow) -> Unit)? = null
+    scope: CoroutineScope? = null
 ) : JPanel(BorderLayout()), Disposable {
 
     @Suppress("unused") private val autoRefreshService = project.service<AutoRefreshService>()
@@ -28,7 +26,7 @@ class WorkflowsPanel(
     private val effectiveScope = scope ?: CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val toolbar = WorkflowsToolbar(project, effectiveScope)
-    private val table = WorkflowList(project, onWorkflowDoubleClick)
+    private val table = WorkflowList(project)
     private val statusIcon = ConnectionStatusIcon(project)
     private val statusLabel = ConnectionInfoLabel(project)
     private var consentBanner: AnalyticsConsentBanner? = null

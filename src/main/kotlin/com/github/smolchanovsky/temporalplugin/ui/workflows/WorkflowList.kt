@@ -1,12 +1,11 @@
 package com.github.smolchanovsky.temporalplugin.ui.workflows
 
 import com.github.smolchanovsky.temporalplugin.TextBundle
-import com.github.smolchanovsky.temporalplugin.domain.Workflow
 import com.github.smolchanovsky.temporalplugin.domain.WorkflowStatus
 import com.github.smolchanovsky.temporalplugin.state.TemporalState
+import com.github.smolchanovsky.temporalplugin.state.ViewState
 import com.github.smolchanovsky.temporalplugin.ui.common.FormatUtils
 import com.github.smolchanovsky.temporalplugin.ui.common.WorkflowStatusPresentation
-import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -14,8 +13,6 @@ import com.intellij.ui.DoubleClickListener
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import java.awt.Component
-import java.awt.Cursor
-import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.JTable
 import javax.swing.ListSelectionModel
@@ -24,22 +21,21 @@ import javax.swing.table.AbstractTableModel
 import javax.swing.table.DefaultTableCellRenderer
 
 class WorkflowList(
-    project: Project,
-    private val onWorkflowDoubleClick: ((Workflow) -> Unit)? = null
+    project: Project
 ) : JBScrollPane(), Disposable {
 
     private val state = project.service<TemporalState>()
     private val model = WorkflowTableModel()
     private val table = JBTable(model)
 
-    private val onWorkflowsUpdated: (List<Workflow>) -> Unit = { workflows ->
+    private val onWorkflowsUpdated: (List<com.github.smolchanovsky.temporalplugin.domain.Workflow>) -> Unit = { workflows ->
         SwingUtilities.invokeLater {
             model.updateWorkflows(workflows)
             restoreSelection(workflows)
         }
     }
 
-    private fun restoreSelection(workflows: List<Workflow>) {
+    private fun restoreSelection(workflows: List<com.github.smolchanovsky.temporalplugin.domain.Workflow>) {
         val selectedRunId = state.selectedWorkflowRunId ?: return
         val index = workflows.indexOfFirst { it.runId == selectedRunId }
         if (index >= 0) {
@@ -71,33 +67,6 @@ class WorkflowList(
         endTimeColumn.preferredWidth = 100
         endTimeColumn.maxWidth = 120
 
-        val detailsColumn = table.columnModel.getColumn(DETAILS_COLUMN)
-        detailsColumn.cellRenderer = DetailsRenderer()
-        detailsColumn.preferredWidth = 32
-        detailsColumn.maxWidth = 32
-        detailsColumn.minWidth = 32
-
-        table.addMouseListener(object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent) {
-                val column = table.columnAtPoint(e.point)
-                val row = table.rowAtPoint(e.point)
-                if (column == DETAILS_COLUMN && row >= 0) {
-                    model.getWorkflowAt(row)?.let { onWorkflowDoubleClick?.invoke(it) }
-                }
-            }
-        })
-
-        table.addMouseMotionListener(object : MouseAdapter() {
-            override fun mouseMoved(e: MouseEvent) {
-                val column = table.columnAtPoint(e.point)
-                table.cursor = if (column == DETAILS_COLUMN) {
-                    Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-                } else {
-                    Cursor.getDefaultCursor()
-                }
-            }
-        })
-
         table.selectionModel.addListSelectionListener { e ->
             if (!e.valueIsAdjusting && table.selectedRow >= 0) {
                 state.selectedWorkflowRunId = model.getWorkflowAt(table.selectedRow)?.runId
@@ -108,7 +77,9 @@ class WorkflowList(
             override fun onDoubleClick(event: MouseEvent): Boolean {
                 val row = table.selectedRow
                 if (row >= 0) {
-                    model.getWorkflowAt(row)?.let { onWorkflowDoubleClick?.invoke(it) }
+                    model.getWorkflowAt(row)?.let { workflow ->
+                        state.updateViewState(ViewState.WorkflowDetailsView(workflow, isLoading = true))
+                    }
                     return true
                 }
                 return false
@@ -124,7 +95,6 @@ class WorkflowList(
         private const val STATUS_COLUMN = 0
         private const val START_TIME_COLUMN = 4
         private const val END_TIME_COLUMN = 5
-        private const val DETAILS_COLUMN = 6
     }
 }
 
@@ -136,18 +106,17 @@ private class WorkflowTableModel : AbstractTableModel() {
         TextBundle.message("table.column.runId"),
         TextBundle.message("table.column.type"),
         TextBundle.message("table.column.startTime"),
-        TextBundle.message("table.column.endTime"),
-        ""
+        TextBundle.message("table.column.endTime")
     )
 
-    private var workflows: List<Workflow> = emptyList()
+    private var workflows: List<com.github.smolchanovsky.temporalplugin.domain.Workflow> = emptyList()
 
-    fun updateWorkflows(newWorkflows: List<Workflow>) {
+    fun updateWorkflows(newWorkflows: List<com.github.smolchanovsky.temporalplugin.domain.Workflow>) {
         workflows = newWorkflows
         fireTableDataChanged()
     }
 
-    fun getWorkflowAt(row: Int): Workflow? = workflows.getOrNull(row)
+    fun getWorkflowAt(row: Int): com.github.smolchanovsky.temporalplugin.domain.Workflow? = workflows.getOrNull(row)
 
     override fun getRowCount(): Int = workflows.size
     override fun getColumnCount(): Int = columns.size
@@ -162,7 +131,6 @@ private class WorkflowTableModel : AbstractTableModel() {
             3 -> workflow.type
             4 -> FormatUtils.formatTime(workflow.startTime)
             5 -> workflow.endTime?.let { FormatUtils.formatTime(it) } ?: ""
-            6 -> "" // Details column - icon only
             else -> null
         }
     }
@@ -192,20 +160,6 @@ private class StatusRenderer : DefaultTableCellRenderer() {
         text = ""
         horizontalAlignment = CENTER
         toolTipText = status.displayName
-        return this
-    }
-}
-
-private class DetailsRenderer : DefaultTableCellRenderer() {
-
-    override fun getTableCellRendererComponent(
-        table: JTable?, value: Any?, isSelected: Boolean,
-        hasFocus: Boolean, row: Int, column: Int
-    ): Component {
-        super.getTableCellRendererComponent(table, value, isSelected, false, row, column)
-        icon = AllIcons.Ide.External_link_arrow
-        text = ""
-        horizontalAlignment = CENTER
         return this
     }
 }
