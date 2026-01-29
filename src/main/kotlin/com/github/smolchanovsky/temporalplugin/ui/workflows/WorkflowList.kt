@@ -7,20 +7,14 @@ import com.github.smolchanovsky.temporalplugin.state.TemporalState
 import com.github.smolchanovsky.temporalplugin.ui.common.FormatUtils
 import com.github.smolchanovsky.temporalplugin.ui.common.WorkflowStatusPresentation
 import com.intellij.icons.AllIcons
-import com.intellij.ide.CopyProvider
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.actionSystem.DataContext
-import com.intellij.openapi.actionSystem.DataProvider
-import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.components.service
-import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.Project
 import com.intellij.ui.DoubleClickListener
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import java.awt.Component
 import java.awt.Cursor
-import java.awt.datatransfer.StringSelection
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.JTable
@@ -32,7 +26,7 @@ import javax.swing.table.DefaultTableCellRenderer
 class WorkflowList(
     project: Project,
     private val onWorkflowDoubleClick: ((Workflow) -> Unit)? = null
-) : JBScrollPane(), Disposable, DataProvider, CopyProvider {
+) : JBScrollPane(), Disposable {
 
     private val state = project.service<TemporalState>()
     private val model = WorkflowTableModel()
@@ -60,7 +54,9 @@ class WorkflowList(
         table.fillsViewportHeight = true
         table.autoResizeMode = JBTable.AUTO_RESIZE_ALL_COLUMNS
         table.selectionModel.selectionMode = ListSelectionModel.SINGLE_SELECTION
-        table.cellSelectionEnabled = true
+        table.setCellSelectionEnabled(false)
+        table.setRowSelectionAllowed(true)
+        table.setDefaultRenderer(Any::class.java, NoFocusRenderer())
 
         val statusColumn = table.columnModel.getColumn(STATUS_COLUMN)
         statusColumn.cellRenderer = StatusRenderer()
@@ -124,36 +120,6 @@ class WorkflowList(
         state.removeWorkflowsListener(onWorkflowsUpdated)
     }
 
-    // DataProvider implementation
-    override fun getData(dataId: String): Any? {
-        if (PlatformDataKeys.COPY_PROVIDER.`is`(dataId)) {
-            return this
-        }
-        return null
-    }
-
-    // CopyProvider implementation
-    override fun isCopyEnabled(dataContext: DataContext): Boolean {
-        val row = table.selectedRow
-        val column = table.selectedColumn
-        if (row < 0 || column < 0) return false
-        val value = table.getValueAt(row, column)?.toString() ?: ""
-        return value.isNotEmpty()
-    }
-
-    override fun isCopyVisible(dataContext: DataContext): Boolean = true
-
-    override fun performCopy(dataContext: DataContext) {
-        val row = table.selectedRow
-        val column = table.selectedColumn
-        if (row >= 0 && column >= 0) {
-            val value = table.getValueAt(row, column)?.toString() ?: ""
-            if (value.isNotEmpty()) {
-                CopyPasteManager.getInstance().setContents(StringSelection(value))
-            }
-        }
-    }
-
     companion object {
         private const val STATUS_COLUMN = 0
         private const val START_TIME_COLUMN = 4
@@ -204,13 +170,23 @@ private class WorkflowTableModel : AbstractTableModel() {
     override fun isCellEditable(rowIndex: Int, columnIndex: Int): Boolean = false
 }
 
+private class NoFocusRenderer : DefaultTableCellRenderer() {
+
+    override fun getTableCellRendererComponent(
+        table: JTable?, value: Any?, isSelected: Boolean,
+        hasFocus: Boolean, row: Int, column: Int
+    ): Component {
+        return super.getTableCellRendererComponent(table, value, isSelected, false, row, column)
+    }
+}
+
 private class StatusRenderer : DefaultTableCellRenderer() {
 
     override fun getTableCellRendererComponent(
         table: JTable?, value: Any?, isSelected: Boolean,
         hasFocus: Boolean, row: Int, column: Int
     ): Component {
-        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
+        super.getTableCellRendererComponent(table, value, isSelected, false, row, column)
         val status = value as? WorkflowStatus ?: WorkflowStatus.UNKNOWN
         icon = WorkflowStatusPresentation.getIcon(status)
         text = ""
@@ -226,7 +202,7 @@ private class DetailsRenderer : DefaultTableCellRenderer() {
         table: JTable?, value: Any?, isSelected: Boolean,
         hasFocus: Boolean, row: Int, column: Int
     ): Component {
-        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
+        super.getTableCellRendererComponent(table, value, isSelected, false, row, column)
         icon = AllIcons.Ide.External_link_arrow
         text = ""
         horizontalAlignment = CENTER
