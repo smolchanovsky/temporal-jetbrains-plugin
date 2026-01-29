@@ -43,6 +43,7 @@ private data class WorkflowListItemDto(
             id = execution.workflowId,
             runId = execution.runId,
             type = type.name,
+            taskQueue = taskQueue,
             status = WorkflowStatus.fromString(status),
             startTime = TimeUtils.parseInstant(startTime) ?: Instant.EPOCH,
             endTime = closeTime?.let { TimeUtils.parseInstant(it) }

@@ -64,17 +64,19 @@ class WorkflowsToolbar(
             add(DisconnectAction(project))
             add(RefreshAction(project))
             addSeparator()
-            add(OpenDetailsAction(project))
-            add(GoToDefinitionAction(project))
+            add(RunWorkflowAction(project, scope))
             add(RerunWorkflowAction(project, scope))
             add(CancelWorkflowActionGroup(project, scope))
             addSeparator()
-            add(SettingsAction(project))
+            add(OpenDetailsAction(project))
+            add(GoToDefinitionAction(project))
         }
 
         val rightActionGroup = DefaultActionGroup().apply {
             add(envSelector)
             add(nsSelector)
+            addSeparator()
+            add(SettingsAction(project))
         }
 
         leftToolbar = ActionManager.getInstance().createActionToolbar(

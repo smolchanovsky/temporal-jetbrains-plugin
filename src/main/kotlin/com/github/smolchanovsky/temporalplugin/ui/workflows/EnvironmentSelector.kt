@@ -1,5 +1,6 @@
 package com.github.smolchanovsky.temporalplugin.ui.workflows
 
+import com.github.smolchanovsky.temporalplugin.TextBundle
 import com.github.smolchanovsky.temporalplugin.domain.Environment
 import com.github.smolchanovsky.temporalplugin.TemporalMediator
 import com.github.smolchanovsky.temporalplugin.cli.GetEnvironmentsQuery
@@ -49,7 +50,8 @@ class EnvironmentSelector(
 
     override fun update(e: AnActionEvent) {
         e.presentation.isEnabled = state.cliAvailable
-        e.presentation.text = "Env: ${state.selectedEnvironment.name}"
+        e.presentation.text = TextBundle.message("environment.selector", state.selectedEnvironment.name)
+        e.presentation.description = TextBundle.message("environment.tooltip")
     }
 
     fun load() {

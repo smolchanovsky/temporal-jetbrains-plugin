@@ -1,5 +1,6 @@
 package com.github.smolchanovsky.temporalplugin.ui.workflows
 
+import com.github.smolchanovsky.temporalplugin.TextBundle
 import com.github.smolchanovsky.temporalplugin.domain.Namespace
 import com.github.smolchanovsky.temporalplugin.TemporalMediator
 import com.github.smolchanovsky.temporalplugin.cli.GetNamespacesQuery
@@ -69,7 +70,9 @@ class NamespaceSelector(
         val connectionState = state.connectionState
         e.presentation.isEnabled = connectionState is ConnectionState.Connected ||
             connectionState is ConnectionState.Refreshing
-        e.presentation.text = "NS: ${if (namespaces.isNotEmpty()) state.selectedNamespace.name else "-"}"
+        val nsName = if (namespaces.isNotEmpty()) state.selectedNamespace.name else TextBundle.message("namespace.empty")
+        e.presentation.text = TextBundle.message("namespace.selector", nsName)
+        e.presentation.description = TextBundle.message("namespace.tooltip")
     }
 
     private fun load() {
