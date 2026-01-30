@@ -7,7 +7,7 @@ kediatr = "4.3.0"
 
 # plugins
 changelog = "2.5.0"
-kotlinSerialization = "2.2.21"
+kotlinSerialization = "2.3.0"
 intelliJPlatform = "2.10.5"
 kotlin = "2.2.21"
 kover = "0.9.3"
