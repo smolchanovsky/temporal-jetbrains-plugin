@@ -1,4 +1,4 @@
-package com.github.smolchanovsky.temporalplugin.usecase.navigation.finders
+package com.github.smolchanovsky.temporalplugin.usecase.navigation.java
 
 import com.github.smolchanovsky.temporalplugin.usecase.navigation.WorkflowDefinitionFinder
 import com.github.smolchanovsky.temporalplugin.usecase.navigation.WorkflowMatch

@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(./gradlew check:*)",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "Bash(./gradlew test:*)"
     ]
   }
 }
