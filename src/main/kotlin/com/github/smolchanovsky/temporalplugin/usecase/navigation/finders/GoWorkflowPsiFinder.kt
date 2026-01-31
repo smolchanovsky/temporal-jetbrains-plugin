@@ -1,7 +1,7 @@
-package com.github.smolchanovsky.temporalplugin.ui.navigation.finders
+package com.github.smolchanovsky.temporalplugin.usecase.navigation.finders
 
-import com.github.smolchanovsky.temporalplugin.ui.navigation.WorkflowDefinitionFinder
-import com.github.smolchanovsky.temporalplugin.ui.navigation.WorkflowNavigationItem
+import com.github.smolchanovsky.temporalplugin.usecase.navigation.WorkflowDefinitionFinder
+import com.github.smolchanovsky.temporalplugin.usecase.navigation.WorkflowMatch
 import com.goide.psi.GoFile
 import com.goide.psi.GoFunctionDeclaration
 import com.goide.psi.GoMethodDeclaration
@@ -22,42 +22,42 @@ class GoWorkflowPsiFinder : WorkflowDefinitionFinder {
 
     override fun getLanguageName(): String = "Go"
 
-    override fun findNavigationItems(
+    override fun findWorkflowMatches(
         project: Project,
         workflowType: String,
         scope: GlobalSearchScope
-    ): List<WorkflowNavigationItem> {
-        val results = mutableListOf<WorkflowNavigationItem>()
+    ): List<WorkflowMatch> {
+        val results = mutableListOf<WorkflowMatch>()
         val psiManager = PsiManager.getInstance(project)
 
         FileTypeIndex.getFiles(GoFileType.INSTANCE, scope).forEach { virtualFile ->
             val goFile = psiManager.findFile(virtualFile) as? GoFile ?: return@forEach
 
             goFile.functions.filter { it.name == workflowType && hasWorkflowContextParameter(it) }
-                .mapTo(results) { createNavigationItem(it, goFile) }
+                .mapTo(results) { createMatch(it, goFile) }
 
             goFile.methods.filter { it.name == workflowType && hasWorkflowContextParameter(it) }
-                .mapTo(results) { createNavigationItem(it, goFile) }
+                .mapTo(results) { createMatch(it, goFile) }
         }
 
         return results
     }
 
-    override fun findAllNavigationItems(
+    override fun findAllWorkflowMatches(
         project: Project,
         scope: GlobalSearchScope
-    ): List<WorkflowNavigationItem> {
-        val results = mutableListOf<WorkflowNavigationItem>()
+    ): List<WorkflowMatch> {
+        val results = mutableListOf<WorkflowMatch>()
         val psiManager = PsiManager.getInstance(project)
 
         FileTypeIndex.getFiles(GoFileType.INSTANCE, scope).forEach { virtualFile ->
             val goFile = psiManager.findFile(virtualFile) as? GoFile ?: return@forEach
 
             goFile.functions.filter { hasWorkflowContextParameter(it) }
-                .mapTo(results) { createNavigationItem(it, goFile) }
+                .mapTo(results) { createMatch(it, goFile) }
 
             goFile.methods.filter { hasWorkflowContextParameter(it) }
-                .mapTo(results) { createNavigationItem(it, goFile) }
+                .mapTo(results) { createMatch(it, goFile) }
         }
 
         return results
@@ -75,8 +75,8 @@ class GoWorkflowPsiFinder : WorkflowDefinitionFinder {
         return paramType == WORKFLOW_CONTEXT_TYPE
     }
 
-    private fun createNavigationItem(function: GoFunctionDeclaration, goFile: GoFile): WorkflowNavigationItem {
-        return WorkflowNavigationItem(
+    private fun createMatch(function: GoFunctionDeclaration, goFile: GoFile): WorkflowMatch {
+        return WorkflowMatch(
             element = function.identifier ?: function,
             workflowType = function.name ?: "Unknown",
             definitionType = "function",
@@ -85,8 +85,8 @@ class GoWorkflowPsiFinder : WorkflowDefinitionFinder {
         )
     }
 
-    private fun createNavigationItem(method: GoMethodDeclaration, goFile: GoFile): WorkflowNavigationItem {
-        return WorkflowNavigationItem(
+    private fun createMatch(method: GoMethodDeclaration, goFile: GoFile): WorkflowMatch {
+        return WorkflowMatch(
             element = method.identifier ?: method,
             workflowType = method.name ?: "Unknown",
             definitionType = "method",

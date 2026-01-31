@@ -14,7 +14,7 @@
     <extensionPoints>
         <extensionPoint
             name="workflowDefinitionFinder"
-            interface="com.github.smolchanovsky.temporalplugin.ui.navigation.WorkflowDefinitionFinder"
+            interface="com.github.smolchanovsky.temporalplugin.usecase.navigation.WorkflowDefinitionFinder"
             dynamic="true"/>
     </extensionPoints>
 

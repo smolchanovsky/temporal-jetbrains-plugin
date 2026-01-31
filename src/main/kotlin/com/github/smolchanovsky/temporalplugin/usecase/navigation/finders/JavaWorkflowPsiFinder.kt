@@ -1,7 +1,7 @@
-package com.github.smolchanovsky.temporalplugin.ui.navigation.finders
+package com.github.smolchanovsky.temporalplugin.usecase.navigation.finders
 
-import com.github.smolchanovsky.temporalplugin.ui.navigation.WorkflowDefinitionFinder
-import com.github.smolchanovsky.temporalplugin.ui.navigation.WorkflowNavigationItem
+import com.github.smolchanovsky.temporalplugin.usecase.navigation.WorkflowDefinitionFinder
+import com.github.smolchanovsky.temporalplugin.usecase.navigation.WorkflowMatch
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiClass
@@ -21,12 +21,12 @@ class JavaWorkflowPsiFinder : WorkflowDefinitionFinder {
 
     override fun getLanguageName(): String = "Java/Kotlin"
 
-    override fun findNavigationItems(
+    override fun findWorkflowMatches(
         project: Project,
         workflowType: String,
         scope: GlobalSearchScope
-    ): List<WorkflowNavigationItem> {
-        val results = mutableListOf<WorkflowNavigationItem>()
+    ): List<WorkflowMatch> {
+        val results = mutableListOf<WorkflowMatch>()
         val allScope = GlobalSearchScope.allScope(project)
 
         val workflowInterfaceClass = findAnnotationClass(project, WORKFLOW_INTERFACE_FQN, allScope)
@@ -35,7 +35,7 @@ class JavaWorkflowPsiFinder : WorkflowDefinitionFinder {
                 .filter { psiClass ->
                     psiClass.name == workflowType || getWorkflowMethodName(psiClass) == workflowType
                 }
-                .mapTo(results) { createNavigationItem(it) }
+                .mapTo(results) { createMatch(it) }
         }
 
         val workflowMethodClass = findAnnotationClass(project, WORKFLOW_METHOD_FQN, allScope)
@@ -45,23 +45,23 @@ class JavaWorkflowPsiFinder : WorkflowDefinitionFinder {
                     val annotationName = getWorkflowMethodAnnotationName(method)
                     annotationName == workflowType || (annotationName == null && method.name == workflowType)
                 }
-                .mapTo(results) { createNavigationItemFromMethod(it) }
+                .mapTo(results) { createMatchFromMethod(it) }
         }
 
         return results
     }
 
-    override fun findAllNavigationItems(
+    override fun findAllWorkflowMatches(
         project: Project,
         scope: GlobalSearchScope
-    ): List<WorkflowNavigationItem> {
-        val results = mutableListOf<WorkflowNavigationItem>()
+    ): List<WorkflowMatch> {
+        val results = mutableListOf<WorkflowMatch>()
         val allScope = GlobalSearchScope.allScope(project)
 
         val workflowInterfaceClass = findAnnotationClass(project, WORKFLOW_INTERFACE_FQN, allScope)
         if (workflowInterfaceClass != null) {
             AnnotatedElementsSearch.searchPsiClasses(workflowInterfaceClass, scope)
-                .mapTo(results) { createNavigationItem(it) }
+                .mapTo(results) { createMatch(it) }
         }
 
         return results
@@ -92,11 +92,11 @@ class JavaWorkflowPsiFinder : WorkflowDefinitionFinder {
         return if (!name.isNullOrEmpty()) name else null
     }
 
-    private fun createNavigationItem(psiClass: PsiClass): WorkflowNavigationItem {
+    private fun createMatch(psiClass: PsiClass): WorkflowMatch {
         val workflowType = getWorkflowMethodName(psiClass) ?: psiClass.name ?: "Unknown"
         val namespace = (psiClass.containingFile as? PsiJavaFile)?.packageName
 
-        return WorkflowNavigationItem(
+        return WorkflowMatch(
             element = psiClass.nameIdentifier ?: psiClass,
             workflowType = workflowType,
             definitionType = "interface",
@@ -105,12 +105,12 @@ class JavaWorkflowPsiFinder : WorkflowDefinitionFinder {
         )
     }
 
-    private fun createNavigationItemFromMethod(method: PsiMethod): WorkflowNavigationItem {
+    private fun createMatchFromMethod(method: PsiMethod): WorkflowMatch {
         val annotationName = getWorkflowMethodAnnotationName(method)
         val workflowType = annotationName ?: method.name
         val namespace = (method.containingFile as? PsiJavaFile)?.packageName
 
-        return WorkflowNavigationItem(
+        return WorkflowMatch(
             element = method.nameIdentifier ?: method,
             workflowType = workflowType,
             definitionType = "method",

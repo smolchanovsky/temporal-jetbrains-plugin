@@ -14,6 +14,11 @@ import com.github.smolchanovsky.temporalplugin.cli.utils.CliExecutor
 import com.github.smolchanovsky.temporalplugin.ui.settings.TemporalSettings
 import com.github.smolchanovsky.temporalplugin.state.TemporalState
 import com.github.smolchanovsky.temporalplugin.usecase.CancelWorkflowHandler
+import com.github.smolchanovsky.temporalplugin.usecase.navigation.CachingWorkflowFinder
+import com.github.smolchanovsky.temporalplugin.usecase.navigation.CompositeWorkflowFinder
+import com.github.smolchanovsky.temporalplugin.usecase.navigation.FindWorkflowDefinitionHandler
+import com.github.smolchanovsky.temporalplugin.usecase.navigation.WorkflowDefinitionFinder
+import com.intellij.openapi.extensions.ExtensionPointName
 import com.github.smolchanovsky.temporalplugin.usecase.ConnectUseCaseHandler
 import com.github.smolchanovsky.temporalplugin.usecase.DisconnectUseCaseHandler
 import com.github.smolchanovsky.temporalplugin.usecase.GenerateWorkflowDataHandler
@@ -30,8 +35,20 @@ import com.trendyol.kediatr.Mediator
 @Service(Service.Level.PROJECT)
 class TemporalMediator(project: Project) {
 
+    companion object {
+        private val FINDER_EP: ExtensionPointName<WorkflowDefinitionFinder> = ExtensionPointName.create(
+            "com.github.smolchanovsky.temporalplugin.workflowDefinitionFinder"
+        )
+    }
+
     private val state = project.service<TemporalState>()
     private val cli = CliExecutor(TemporalSettings.Companion.getInstance(project))
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun createFinder(project: Project): WorkflowDefinitionFinder {
+        val finders = FINDER_EP.extensionList.map { CachingWorkflowFinder(it) }
+        return CompositeWorkflowFinder(finders)
+    }
 
     val mediator: Mediator by lazy {
         lateinit var instance: Mediator
@@ -54,7 +71,8 @@ class TemporalMediator(project: Project) {
                 GenerateWorkflowDataHandler(state) { instance },
                 RerunWorkflowHandler(state) { instance },
                 CancelWorkflowHandler(state) { instance },
-                TerminateWorkflowHandler(state) { instance }
+                TerminateWorkflowHandler(state) { instance },
+                FindWorkflowDefinitionHandler(::createFinder)
             )
         )
         instance

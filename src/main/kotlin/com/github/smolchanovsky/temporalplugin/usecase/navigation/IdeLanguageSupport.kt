@@ -1,4 +1,4 @@
-package com.github.smolchanovsky.temporalplugin.ui.navigation
+package com.github.smolchanovsky.temporalplugin.usecase.navigation
 
 import com.github.smolchanovsky.temporalplugin.TextBundle
 import com.intellij.openapi.application.ApplicationInfo

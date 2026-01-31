@@ -3,8 +3,8 @@ package com.github.smolchanovsky.temporalplugin.ui.workflows.actions
 import com.github.smolchanovsky.temporalplugin.TextBundle
 import com.github.smolchanovsky.temporalplugin.state.TemporalState
 import com.github.smolchanovsky.temporalplugin.ui.analytics.base.TrackedAction
-import com.github.smolchanovsky.temporalplugin.ui.navigation.IdeLanguageSupport
 import com.github.smolchanovsky.temporalplugin.ui.navigation.WorkflowNavigationService
+import com.github.smolchanovsky.temporalplugin.usecase.navigation.IdeLanguageSupport
 import com.intellij.icons.AllIcons
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.actionSystem.AnActionEvent

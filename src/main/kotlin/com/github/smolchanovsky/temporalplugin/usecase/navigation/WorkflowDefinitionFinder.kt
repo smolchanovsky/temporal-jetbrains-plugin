@@ -1,4 +1,4 @@
-package com.github.smolchanovsky.temporalplugin.ui.navigation
+package com.github.smolchanovsky.temporalplugin.usecase.navigation
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.search.GlobalSearchScope
@@ -7,14 +7,14 @@ interface WorkflowDefinitionFinder {
     fun getSupportedFileExtensions(): Set<String>
     fun getLanguageName(): String
 
-    fun findNavigationItems(
+    fun findWorkflowMatches(
         project: Project,
         workflowType: String,
         scope: GlobalSearchScope
-    ): List<WorkflowNavigationItem>
+    ): List<WorkflowMatch>
 
-    fun findAllNavigationItems(
+    fun findAllWorkflowMatches(
         project: Project,
         scope: GlobalSearchScope
-    ): List<WorkflowNavigationItem>
+    ): List<WorkflowMatch>
 }
