@@ -5,8 +5,6 @@ import com.github.smolchanovsky.temporalplugin.TextBundle
 import com.github.smolchanovsky.temporalplugin.usecase.navigation.FindWorkflowDefinitionRequest
 import com.github.smolchanovsky.temporalplugin.usecase.navigation.WorkflowDefinitionFinder
 import com.github.smolchanovsky.temporalplugin.usecase.navigation.WorkflowMatch
-import com.intellij.notification.NotificationGroupManager
-import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
@@ -30,7 +28,7 @@ class WorkflowNavigationService(private val project: Project) {
 
     fun hasFinders(): Boolean = EP_NAME.extensionList.isNotEmpty()
 
-    fun navigateToWorkflowDefinition(workflowType: String) {
+    fun findWorkflowDefinition(workflowType: String, onResult: (NavigationResult) -> Unit) {
         ProgressManager.getInstance().run(object : Task.Backgroundable(
             project,
             TextBundle.message("navigation.searching", workflowType),
@@ -45,34 +43,20 @@ class WorkflowNavigationService(private val project: Project) {
                 }
 
                 ApplicationManager.getApplication().invokeLater {
-                    handleSearchResults(workflowType, matches)
+                    onResult(toNavigationResult(workflowType, matches))
                 }
             }
         })
     }
 
-    private fun handleSearchResults(workflowType: String, matches: List<WorkflowMatch>) {
-        when {
-            matches.isEmpty() -> {
-                showNotification(TextBundle.message("navigation.not.found", workflowType))
-            }
-            matches.size == 1 -> {
-                matches.first().navigate(true)
-            }
-            else -> {
-                WorkflowNavigationPopup.show(
-                    project,
-                    TextBundle.message("navigation.popup.multiple", workflowType),
-                    matches
-                )
-            }
+    private fun toNavigationResult(workflowType: String, matches: List<WorkflowMatch>): NavigationResult {
+        return when {
+            matches.isEmpty() -> NavigationResult.NotFound(workflowType)
+            matches.size == 1 -> NavigationResult.SingleMatch(matches.first())
+            else -> NavigationResult.MultipleMatches(
+                title = TextBundle.message("navigation.popup.multiple", workflowType),
+                matches = matches
+            )
         }
-    }
-
-    private fun showNotification(message: String) {
-        NotificationGroupManager.getInstance()
-            .getNotificationGroup("TemporalWorkflowNavigation")
-            .createNotification(message, NotificationType.INFORMATION)
-            .notify(project)
     }
 }

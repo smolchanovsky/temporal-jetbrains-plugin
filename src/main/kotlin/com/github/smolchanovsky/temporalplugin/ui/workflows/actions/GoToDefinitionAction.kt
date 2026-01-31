@@ -3,10 +3,14 @@ package com.github.smolchanovsky.temporalplugin.ui.workflows.actions
 import com.github.smolchanovsky.temporalplugin.TextBundle
 import com.github.smolchanovsky.temporalplugin.state.TemporalState
 import com.github.smolchanovsky.temporalplugin.ui.analytics.base.TrackedAction
+import com.github.smolchanovsky.temporalplugin.ui.navigation.NavigationResult
+import com.github.smolchanovsky.temporalplugin.ui.navigation.WorkflowNavigationPopup
 import com.github.smolchanovsky.temporalplugin.ui.navigation.WorkflowNavigationService
 import com.github.smolchanovsky.temporalplugin.usecase.navigation.IdeLanguageSupport
 import com.intellij.icons.AllIcons
 import com.intellij.ide.util.PropertiesComponent
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -37,7 +41,32 @@ class GoToDefinitionAction(
             showUnsupportedLanguageTooltip(e)
             return
         }
-        state.selectedWorkflow?.let { nav.navigateToWorkflowDefinition(it.type) }
+        state.selectedWorkflow?.let { workflow ->
+            nav.findWorkflowDefinition(workflow.type) { result ->
+                handleNavigationResult(result)
+            }
+        }
+    }
+
+    private fun handleNavigationResult(result: NavigationResult) {
+        when (result) {
+            is NavigationResult.SingleMatch -> {
+                result.match.navigate(true)
+            }
+            is NavigationResult.MultipleMatches -> {
+                WorkflowNavigationPopup.show(project, result.title, result.matches)
+            }
+            is NavigationResult.NotFound -> {
+                showNotification(TextBundle.message("navigation.not.found", result.workflowType))
+            }
+        }
+    }
+
+    private fun showNotification(message: String) {
+        NotificationGroupManager.getInstance()
+            .getNotificationGroup("TemporalWorkflowNavigation")
+            .createNotification(message, NotificationType.INFORMATION)
+            .notify(project)
     }
 
     override fun update(e: AnActionEvent) {
