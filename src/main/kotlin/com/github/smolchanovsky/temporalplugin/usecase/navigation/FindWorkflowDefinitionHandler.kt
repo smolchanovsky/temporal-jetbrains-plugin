@@ -1,6 +1,6 @@
 package com.github.smolchanovsky.temporalplugin.usecase.navigation
 
-import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.psi.search.GlobalSearchScope
 import com.trendyol.kediatr.Request
@@ -21,7 +21,7 @@ class FindWorkflowDefinitionHandler(
         val scope = GlobalSearchScope.projectScope(project)
         val finder = finderProvider(project)
 
-        return ReadAction.compute<List<WorkflowMatch>, Throwable> {
+        return DumbService.getInstance(project).runReadActionInSmartMode<List<WorkflowMatch>> {
             finder.findWorkflowMatches(project, workflowType, scope)
         }
     }
