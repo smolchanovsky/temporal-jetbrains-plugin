@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.0.4]
+### Added
+- Onboarding: auto-open tool window on first plugin launch with connect hint
+
+### Changed
+- Improved Go workflow navigation with new search strategies
+- Improved Java workflow navigation with new search strategies
+
+### Fixed
+- Details loading issue
+- Action buttons layout in workflow details
+
 ## [0.0.3]
 ### Added
 - Workflow search by Workflow ID, Run ID, and status

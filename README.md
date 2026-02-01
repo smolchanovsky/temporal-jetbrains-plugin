@@ -5,10 +5,11 @@
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/29819-temporal-io.svg)](https://plugins.jetbrains.com/plugin/29819-temporal-io)
 
 <!-- Plugin description -->
-A JetBrains IDE plugin for browsing and navigating [Temporal](https://temporal.io/) workflows.
+A JetBrains IDE plugin for browsing, running, and navigating [Temporal](https://temporal.io/) workflows.
 
 **Features:**
-- **Workflow Browser** — Browse workflows with status, type, and timestamps directly from your IDE
+- **Workflow Browser** — Browse workflows with filtering and search
+- **Workflow Control** — Start workflows and control their lifecycle
 - **Workflow Details** — View workflow overview, input/output, and complete event history with timestamps and detailed attributes
 - **Code Navigation** — Navigate from workflows to their definitions in code (Go, Java)
 - **Multi-Environment & Namespace Support** — Work with Temporal Cloud and self-hosted environments, switch between namespaces
@@ -62,10 +63,11 @@ If the CLI is not in your PATH, configure it in <kbd>Settings</kbd> → <kbd>Too
 1. Open <kbd>View</kbd> → <kbd>Tool Windows</kbd> → <kbd>Temporal</kbd>
 2. Click **Connect**, select environment and namespace
 
-### 3. Browse and Navigate
+### 3. Browse and Manage Workflows
 
-- Double-click a workflow to view details (overview, input/result, event history)
-- Use **Go to Definition** to navigate to workflow code (Go, Java supported)
+- Search and filter workflows, double-click to view details
+- Start, rerun, cancel, or terminate workflows
+- Navigate to workflow definitions in code
 <!-- Plugin usage end -->
 
 ## Contributing
