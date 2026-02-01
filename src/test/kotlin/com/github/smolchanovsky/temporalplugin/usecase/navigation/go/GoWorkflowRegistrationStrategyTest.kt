@@ -4,58 +4,110 @@ class GoWorkflowRegistrationStrategyTest : GoWorkflowStrategyTestBase() {
 
     private val strategy = GoWorkflowRegistrationStrategy()
 
-    private val testCode = """
-        package workflows
+    override fun setUp() {
+        super.setUp()
 
-        import (
-            "go.temporal.io/sdk/worker"
-            "go.temporal.io/sdk/workflow"
-        )
+        addGoFile("workflows/impl.go", """
+            package workflows
 
-        const ThirdWorkflowName = "ThirdWorkflow"
+            import "go.temporal.io/sdk/workflow"
 
-        func thirdWorkflowImpl(ctx workflow.Context, input string) error {
-            return nil
-        }
+            func workflowImpl(ctx workflow.Context, input string) error {
+                return nil
+            }
+        """)
 
-        func RegisterWorkflows(w worker.Worker) {
-            w.RegisterWorkflowWithOptions(thirdWorkflowImpl, workflow.RegisterOptions{
-                Name: "FourthWorkflow",
-            })
+        addGoFile("workflows/register.go", """
+            package workflows
 
-            w.RegisterWorkflowWithOptions(thirdWorkflowImpl, workflow.RegisterOptions{
-                Name: ThirdWorkflowName,
-            })
-        }
-    """.trimIndent()
+            import (
+                "go.temporal.io/sdk/worker"
+                "go.temporal.io/sdk/workflow"
+            )
 
-    fun `test finds workflow by string literal name`() = withGoFile(testCode) { goFile ->
-        val matches = strategy.findMatches(goFile, "FourthWorkflow")
+            func RegisterWorkflows(w worker.Worker) {
+                w.RegisterWorkflowWithOptions(workflowImpl, workflow.RegisterOptions{
+                    Name: "FirstWorkflow",
+                })
+            }
+        """)
+
+        // Constant in separate file, used in registration
+        addGoFile("workflows/constants.go", """
+            package workflows
+
+            const SecondWorkflowName = "SecondWorkflow"
+        """)
+
+        addGoFile("workflows/register2.go", """
+            package workflows
+
+            import (
+                "go.temporal.io/sdk/worker"
+                "go.temporal.io/sdk/workflow"
+            )
+
+            func RegisterMore(w worker.Worker) {
+                w.RegisterWorkflowWithOptions(workflowImpl, workflow.RegisterOptions{
+                    Name: SecondWorkflowName,
+                })
+            }
+        """)
+
+        // Registration in different package
+        addGoFile("other/setup.go", """
+            package other
+
+            import (
+                "go.temporal.io/sdk/worker"
+                "go.temporal.io/sdk/workflow"
+            )
+
+            func otherImpl(ctx workflow.Context) error {
+                return nil
+            }
+
+            func Setup(w worker.Worker) {
+                w.RegisterWorkflowWithOptions(otherImpl, workflow.RegisterOptions{
+                    Name: "ThirdWorkflow",
+                })
+            }
+        """)
+    }
+
+    fun `test finds workflow by string literal name`() {
+        val matches = strategy.findMatches(project, scope, "FirstWorkflow")
 
         assertEquals(1, matches.size)
-        assertEquals("FourthWorkflow", matches[0].workflowType)
+        assertEquals("FirstWorkflow", matches[0].workflowType)
         assertEquals("registered workflow", matches[0].definitionType)
     }
 
-    fun `test finds workflow by constant name`() = withGoFile(testCode) { goFile ->
-        val matches = strategy.findMatches(goFile, "ThirdWorkflow")
+    fun `test finds workflow when constant in different file`() {
+        val matches = strategy.findMatches(project, scope, "SecondWorkflow")
+
+        assertEquals(1, matches.size)
+        assertEquals("SecondWorkflow", matches[0].workflowType)
+    }
+
+    fun `test finds workflow in different package`() {
+        val matches = strategy.findMatches(project, scope, "ThirdWorkflow")
 
         assertEquals(1, matches.size)
         assertEquals("ThirdWorkflow", matches[0].workflowType)
-        assertEquals("registered workflow", matches[0].definitionType)
+        assertEquals("other", matches[0].namespace)
     }
 
-    fun `test finds all registered workflows when workflowType is null`() = withGoFile(testCode) { goFile ->
-        val matches = strategy.findMatches(goFile, null)
+    fun `test finds all registered workflows when workflowType is null`() {
+        val matches = strategy.findMatches(project, scope, null)
 
-        assertEquals(2, matches.size)
+        assertEquals(3, matches.size)
         val types = matches.map { it.workflowType }.toSet()
-        assertTrue(types.contains("FourthWorkflow"))
-        assertTrue(types.contains("ThirdWorkflow"))
+        assertEquals(setOf("FirstWorkflow", "SecondWorkflow", "ThirdWorkflow"), types)
     }
 
-    fun `test returns empty for non-existent workflow`() = withGoFile(testCode) { goFile ->
-        val matches = strategy.findMatches(goFile, "NonExistent")
+    fun `test returns empty for non-existent workflow`() {
+        val matches = strategy.findMatches(project, scope, "NonExistent")
 
         assertTrue(matches.isEmpty())
     }

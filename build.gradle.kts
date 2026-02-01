@@ -56,6 +56,7 @@ dependencies {
 
         testFramework(TestFrameworkType.Platform)
         testFramework(TestFrameworkType.Plugin.Java)
+        testFramework(TestFrameworkType.Plugin.Go)
     }
 }
 

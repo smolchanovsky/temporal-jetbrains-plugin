@@ -1,6 +1,7 @@
 package com.github.smolchanovsky.temporalplugin.usecase.navigation.go
 
 import com.github.smolchanovsky.temporalplugin.usecase.navigation.WorkflowMatch
+import com.goide.GoFileType
 import com.goide.psi.GoCallExpr
 import com.goide.psi.GoCompositeLit
 import com.goide.psi.GoFile
@@ -9,7 +10,11 @@ import com.goide.psi.GoReferenceExpression
 import com.goide.psi.GoConstDefinition
 import com.goide.psi.GoConstSpec
 import com.goide.psi.GoStringLiteral
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiManager
+import com.intellij.psi.search.FileTypeIndex
+import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.PsiTreeUtil
 
 class GoWorkflowRegistrationStrategy : GoWorkflowSearchStrategy {
@@ -20,15 +25,25 @@ class GoWorkflowRegistrationStrategy : GoWorkflowSearchStrategy {
         private const val LANGUAGE = "Go"
     }
 
-    override fun findMatches(goFile: GoFile, workflowType: String?): List<WorkflowMatch> {
-        return findRegistrationCalls(goFile)
-            .mapNotNull { call ->
-                val registeredName = getRegisteredName(call) ?: return@mapNotNull null
-                if (workflowType != null && registeredName != workflowType) return@mapNotNull null
+    override fun findMatches(project: Project, scope: GlobalSearchScope, workflowType: String?): List<WorkflowMatch> {
+        val results = mutableListOf<WorkflowMatch>()
+        val psiManager = PsiManager.getInstance(project)
 
-                val workflowFunction = resolveWorkflowFunction(call) ?: return@mapNotNull null
-                createMatch(workflowFunction, registeredName, goFile)
-            }
+        FileTypeIndex.getFiles(GoFileType.INSTANCE, scope).forEach { virtualFile ->
+            val goFile = psiManager.findFile(virtualFile) as? GoFile ?: return@forEach
+
+            findRegistrationCalls(goFile)
+                .mapNotNull { call ->
+                    val registeredName = getRegisteredName(call) ?: return@mapNotNull null
+                    if (workflowType != null && registeredName != workflowType) return@mapNotNull null
+
+                    val workflowFunction = resolveWorkflowFunction(call) ?: return@mapNotNull null
+                    createMatch(workflowFunction, registeredName, workflowFunction.containingFile as GoFile)
+                }
+                .forEach { results.add(it) }
+        }
+
+        return results
     }
 
     private fun findRegistrationCalls(goFile: GoFile): List<GoCallExpr> {

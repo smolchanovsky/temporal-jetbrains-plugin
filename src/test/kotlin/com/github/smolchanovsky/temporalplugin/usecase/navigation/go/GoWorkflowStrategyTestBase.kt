@@ -1,38 +1,19 @@
 package com.github.smolchanovsky.temporalplugin.usecase.navigation.go
 
-import com.goide.GoFileType
+import com.goide.GoCodeInsightFixtureTestCase
 import com.goide.psi.GoFile
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiFileFactory
-import com.intellij.testFramework.LightPlatformCodeInsightTestCase
-import junit.framework.TestCase
+import com.intellij.psi.PsiManager
+import com.intellij.psi.search.GlobalSearchScope
 
-abstract class GoWorkflowStrategyTestBase : LightPlatformCodeInsightTestCase() {
+abstract class GoWorkflowStrategyTestBase : GoCodeInsightFixtureTestCase() {
 
-    protected fun createGoFile(content: String): GoFile? {
-        val psiFileFactory = PsiFileFactory.getInstance(project)
-        val file: PsiFile = psiFileFactory.createFileFromText(
-            "test.go",
-            GoFileType.INSTANCE,
-            content
-        )
+    protected val scope: GlobalSearchScope
+        get() = GlobalSearchScope.allScope(project)
 
-        return file as? GoFile
-    }
+    override fun getTestDataPath(): String = "src/test/testData"
 
-    protected fun skipIfGoNotAvailable(goFile: GoFile?) {
-        if (goFile == null) {
-            println("SKIPPED: Go plugin not available")
-            return
-        }
-    }
-
-    protected inline fun withGoFile(content: String, test: (GoFile) -> Unit) {
-        val goFile = createGoFile(content)
-        if (goFile == null) {
-            println("SKIPPED: Go plugin not available")
-            return
-        }
-        test(goFile)
+    protected fun addGoFile(name: String, content: String): GoFile {
+        val virtualFile = myFixture.addFileToProject(name, content.trimIndent()).virtualFile
+        return PsiManager.getInstance(project).findFile(virtualFile) as GoFile
     }
 }

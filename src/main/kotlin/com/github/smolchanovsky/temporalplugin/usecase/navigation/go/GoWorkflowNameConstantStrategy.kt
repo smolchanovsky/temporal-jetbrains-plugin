@@ -1,13 +1,17 @@
 package com.github.smolchanovsky.temporalplugin.usecase.navigation.go
 
 import com.github.smolchanovsky.temporalplugin.usecase.navigation.WorkflowMatch
+import com.goide.GoFileType
 import com.goide.psi.GoConstDefinition
 import com.goide.psi.GoConstSpec
 import com.goide.psi.GoFile
 import com.goide.psi.GoMethodDeclaration
 import com.goide.psi.GoSignatureOwner
 import com.goide.psi.GoStringLiteral
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiManager
+import com.intellij.psi.search.FileTypeIndex
+import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.PsiTreeUtil
 
 class GoWorkflowNameConstantStrategy : GoWorkflowSearchStrategy {
@@ -23,40 +27,39 @@ class GoWorkflowNameConstantStrategy : GoWorkflowSearchStrategy {
         )
     }
 
-    override fun findMatches(goFile: GoFile, workflowType: String?): List<WorkflowMatch> {
-        val workflowConstants = findWorkflowNameConstants(goFile)
-        if (workflowConstants.isEmpty()) return emptyList()
+    override fun findMatches(project: Project, scope: GlobalSearchScope, workflowType: String?): List<WorkflowMatch> {
+        val psiManager = PsiManager.getInstance(project)
 
-        return workflowConstants.flatMap { (_, constantValue) ->
-            if (workflowType != null && constantValue != workflowType) {
-                return@flatMap emptyList()
-            }
+        // Group files by package
+        val filesByPackage = mutableMapOf<String, MutableList<GoFile>>()
 
-            // First try to find methods in the same file
-            val methodsInFile = findWorkflowMethods(goFile)
-            if (methodsInFile.isNotEmpty()) {
-                return@flatMap methodsInFile.map { method ->
-                    createMatch(method, constantValue, method.containingFile as GoFile)
+        FileTypeIndex.getFiles(GoFileType.INSTANCE, scope).forEach { virtualFile ->
+            val goFile = psiManager.findFile(virtualFile) as? GoFile ?: return@forEach
+            val packageName = goFile.packageName ?: return@forEach
+            filesByPackage.getOrPut(packageName) { mutableListOf() }.add(goFile)
+        }
+
+        val results = mutableListOf<WorkflowMatch>()
+
+        // For each package, find constants and methods
+        filesByPackage.forEach { (_, packageFiles) ->
+            val packageConstants = packageFiles.flatMap { findWorkflowNameConstants(it) }
+            val packageMethods = packageFiles.flatMap { findWorkflowMethods(it) }
+
+            if (packageConstants.isEmpty() || packageMethods.isEmpty()) return@forEach
+
+            packageConstants.forEach { (_, constantValue) ->
+                if (workflowType != null && constantValue != workflowType) {
+                    return@forEach
                 }
-            }
 
-            // Then try to find methods in the same package
-            val methodsInPackage = findWorkflowMethodsInPackage(goFile)
-            methodsInPackage.map { method ->
-                createMatch(method, constantValue, method.containingFile as GoFile)
+                // Use the first method in the package as the navigation target
+                val method = packageMethods.first()
+                results.add(createMatch(method, constantValue, method.containingFile as GoFile))
             }
         }
-    }
 
-    private fun findWorkflowMethodsInPackage(goFile: GoFile): List<GoMethodDeclaration> {
-        val directory = goFile.containingDirectory ?: return emptyList()
-        val psiManager = PsiManager.getInstance(goFile.project)
-
-        val packageFiles = directory.virtualFile.children
-            .filter { it.extension == "go" && it != goFile.virtualFile }
-            .mapNotNull { psiManager.findFile(it) as? GoFile }
-
-        return packageFiles.flatMap { findWorkflowMethods(it) }
+        return results
     }
 
     private fun findWorkflowNameConstants(goFile: GoFile): List<Pair<String, String>> {

@@ -1,10 +1,15 @@
 package com.github.smolchanovsky.temporalplugin.usecase.navigation.go
 
 import com.github.smolchanovsky.temporalplugin.usecase.navigation.WorkflowMatch
+import com.goide.GoFileType
 import com.goide.psi.GoFile
 import com.goide.psi.GoFunctionDeclaration
 import com.goide.psi.GoMethodDeclaration
 import com.goide.psi.GoSignatureOwner
+import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiManager
+import com.intellij.psi.search.FileTypeIndex
+import com.intellij.psi.search.GlobalSearchScope
 
 class GoWorkflowDefinitionStrategy : GoWorkflowSearchStrategy {
 
@@ -13,18 +18,23 @@ class GoWorkflowDefinitionStrategy : GoWorkflowSearchStrategy {
         private const val LANGUAGE = "Go"
     }
 
-    override fun findMatches(goFile: GoFile, workflowType: String?): List<WorkflowMatch> {
+    override fun findMatches(project: Project, scope: GlobalSearchScope, workflowType: String?): List<WorkflowMatch> {
         val results = mutableListOf<WorkflowMatch>()
+        val psiManager = PsiManager.getInstance(project)
 
-        goFile.functions
-            .filter { hasWorkflowContextParameter(it) }
-            .filter { workflowType == null || it.name == workflowType }
-            .mapTo(results) { createMatch(it, goFile) }
+        FileTypeIndex.getFiles(GoFileType.INSTANCE, scope).forEach { virtualFile ->
+            val goFile = psiManager.findFile(virtualFile) as? GoFile ?: return@forEach
 
-        goFile.methods
-            .filter { hasWorkflowContextParameter(it) }
-            .filter { workflowType == null || it.name == workflowType }
-            .mapTo(results) { createMatch(it, goFile) }
+            goFile.functions
+                .filter { hasWorkflowContextParameter(it) }
+                .filter { workflowType == null || it.name == workflowType }
+                .mapTo(results) { createMatch(it, goFile) }
+
+            goFile.methods
+                .filter { hasWorkflowContextParameter(it) }
+                .filter { workflowType == null || it.name == workflowType }
+                .mapTo(results) { createMatch(it, goFile) }
+        }
 
         return results
     }
