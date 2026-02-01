@@ -71,9 +71,15 @@ class EventListItem(private val event: WorkflowEvent) : JPanel(BorderLayout()) {
     init {
         border = JBUI.Borders.empty(4, 8)
         background = JBColor.background()
+        maximumSize = java.awt.Dimension(Int.MAX_VALUE, preferredSize.height)
 
         add(createHeader(), BorderLayout.NORTH)
         add(detailsPanel, BorderLayout.CENTER)
+    }
+
+    override fun getMaximumSize(): java.awt.Dimension {
+        val pref = preferredSize
+        return java.awt.Dimension(Int.MAX_VALUE, pref.height)
     }
 
     private fun createHeader(): JPanel {
