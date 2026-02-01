@@ -7,6 +7,8 @@ import com.github.smolchanovsky.temporalplugin.analytics.ToolWindowOpenEvent
 import com.github.smolchanovsky.temporalplugin.state.TemporalState
 import com.github.smolchanovsky.temporalplugin.state.ViewState
 import com.github.smolchanovsky.temporalplugin.ui.details.WorkflowDetailsPanel
+import com.github.smolchanovsky.temporalplugin.TemporalMediator
+import com.github.smolchanovsky.temporalplugin.ui.onboarding.ShowOnboardingConnectHelp
 import com.github.smolchanovsky.temporalplugin.ui.settings.TemporalSettings
 import com.github.smolchanovsky.temporalplugin.ui.workflows.WorkflowsPanel
 import com.intellij.openapi.Disposable
@@ -25,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import javax.swing.SwingUtilities
 
 class TemporalToolWindowFactory : ToolWindowFactory, DumbAware {
@@ -148,6 +151,8 @@ private class ToolWindowVisibilityTracker(
 
     private val analytics = AnalyticsService.getInstance()
     private val state = project.service<TemporalState>()
+    private val mediator = project.service<TemporalMediator>().mediator
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var wasVisible = false
     private var openTime: Long = 0
 
@@ -176,6 +181,9 @@ private class ToolWindowVisibilityTracker(
         wasVisible = true
         openTime = System.currentTimeMillis()
         analytics.track(ToolWindowOpenEvent(state.viewState::class.simpleName!!))
+        scope.launch {
+            mediator.send(ShowOnboardingConnectHelp(toolWindow.component, toolWindow.disposable))
+        }
     }
 
     private fun onClosed() {
@@ -188,5 +196,6 @@ private class ToolWindowVisibilityTracker(
         if (wasVisible) {
             onClosed()
         }
+        scope.cancel()
     }
 }

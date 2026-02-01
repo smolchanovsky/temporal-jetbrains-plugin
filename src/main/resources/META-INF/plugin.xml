@@ -34,6 +34,8 @@
                            key="notification.group.workflowNavigation" bundle="messages.TemporalBundle"/>
         <notificationGroup id="TemporalErrors" displayType="BALLOON"
                            key="notification.group.errors" bundle="messages.TemporalBundle"/>
+        <postStartupActivity
+                implementation="com.github.smolchanovsky.temporalplugin.ui.toolWindow.ToolWindowStartupActivity"/>
     </extensions>
 
     <actions>

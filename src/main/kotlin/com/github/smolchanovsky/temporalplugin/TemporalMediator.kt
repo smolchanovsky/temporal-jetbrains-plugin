@@ -26,6 +26,8 @@ import com.github.smolchanovsky.temporalplugin.usecase.LoadWorkflowDetailsUseCas
 import com.github.smolchanovsky.temporalplugin.usecase.RefreshUseCaseHandler
 import com.github.smolchanovsky.temporalplugin.usecase.RerunWorkflowHandler
 import com.github.smolchanovsky.temporalplugin.usecase.TerminateWorkflowHandler
+import com.github.smolchanovsky.temporalplugin.ui.onboarding.ShowOnboardingConnectHelpHandler
+import com.github.smolchanovsky.temporalplugin.ui.onboarding.ShowOnboardingToolWindowHandler
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -72,7 +74,9 @@ class TemporalMediator(project: Project) {
                 RerunWorkflowHandler(state) { instance },
                 CancelWorkflowHandler(state) { instance },
                 TerminateWorkflowHandler(state) { instance },
-                FindWorkflowDefinitionHandler(::createFinder)
+                FindWorkflowDefinitionHandler(::createFinder),
+                ShowOnboardingToolWindowHandler(),
+                ShowOnboardingConnectHelpHandler()
             )
         )
         instance
