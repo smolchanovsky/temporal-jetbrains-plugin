@@ -61,7 +61,17 @@ If the CLI is not in your PATH, configure it in <kbd>Settings</kbd> → <kbd>Too
 ### 2. Connect to Temporal Server
 
 1. Open <kbd>View</kbd> → <kbd>Tool Windows</kbd> → <kbd>Temporal</kbd>
-2. Click **Connect**, select environment and namespace
+2. Pick an environment and namespace from the dropdowns on the right side of the toolbar
+3. Click **Connect**
+
+By default the plugin connects to a local Temporal server. To work with Temporal Cloud or a self-hosted server, add an environment via Temporal CLI — for example:
+
+```bash
+temporal env set --env prod --key address --value my-namespace.tmprl.cloud:7233
+temporal env set --env prod --key namespace --value my-namespace
+```
+
+Reopen the tool window for new environments to appear in the dropdown. See the [Temporal CLI environment docs](https://docs.temporal.io/cli/env) for the full set of properties (TLS, API keys, etc.).
 
 ### 3. Browse and Manage Workflows
 
